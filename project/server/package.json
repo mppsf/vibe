@@ -1,0 +1,14 @@
+{
+  "name": "multiplayer-game-server",
+  "version": "1.0.0",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "sqlite3": "^5.1.6"
+  },
+  "scripts": {
+    "start": "node app.js",
+    "init-db": "node initDb.js"
+  }
+}

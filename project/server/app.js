@@ -162,8 +162,8 @@ function updateGame() {
 }
 
 function handlePlayerDeath(player) {
-  const coinsToeDrop = Math.floor(player.coins / 2);
-  for (let i = 0; i < coinsToeDrop; i++) {
+  const coinsToDrop = Math.floor(player.coins / 2);
+  for (let i = 0; i < coinsToDrop; i++) {
     const dropId = gameState.nextId.drop++;
     gameState.droppedCoins.set(dropId, {
       id: dropId,
