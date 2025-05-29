@@ -1,43 +1,61 @@
 class GameAPI {
   constructor() {
     this.baseURL = '/api';
+    this.playerId = null;
+    this.lastUpdate = 0;
   }
 
-  async saveScore(playerName, score) {
-    try {
-      const response = await fetch(`${this.baseURL}/scores`, {
+  async joinGame(playerName) {
+    const response = await fetch(`${this.baseURL}/join`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerName })
+    });
+    const data = await response.json();
+    this.playerId = data.playerId;
+    return data;
+  }
+
+  async updatePlayer(playerData) {
+    if (Date.now() - this.lastUpdate < 50) return;
+    this.lastUpdate = Date.now();
+    
+    await fetch(`${this.baseURL}/update`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerId: this.playerId, ...playerData })
+    });
+  }
+
+  async getGameState() {
+    const response = await fetch(`${this.baseURL}/state`);
+    return await response.json();
+  }
+
+  async attack(x, y) {
+    await fetch(`${this.baseURL}/attack`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerId: this.playerId, x, y })
+    });
+  }
+
+  async leaveGame() {
+    if (this.playerId) {
+      await fetch(`${this.baseURL}/leave`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ playerName, score })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerId: this.playerId })
       });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to save score');
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('Save score error:', error);
-      throw error;
     }
   }
 
-  async getLeaderboard(limit = 10) {
-    try {
-      const response = await fetch(`${this.baseURL}/scores?limit=${limit}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch leaderboard');
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('Leaderboard error:', error);
-      throw error;
-    }
+  async saveScore(score) {
+    await fetch(`${this.baseURL}/scores`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerId: this.playerId, score })
+    });
   }
 }
 

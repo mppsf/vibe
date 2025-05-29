@@ -3,35 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2D Game - Leaderboard</title>
-<link rel="stylesheet" href="style.css">
+<title>Multiplayer Game</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box }
+body { background:#111; color:#fff; font-family:Arial; overflow:hidden }
+#gameContainer { position:relative; width:100vw; height:100vh }
+#game { display:block; background:#222 }
+#ui { position:absolute; top:10px; left:10px; z-index:10; background:rgba(0,0,0,0.7); padding:10px; border-radius:5px }
+#minimap { position:absolute; top:10px; right:10px; width:150px; height:150px; background:rgba(0,0,0,0.8); border:2px solid #555; border-radius:5px }
+#controls { position:absolute; bottom:10px; left:10px; font-size:12px; opacity:0.7 }
+#nameModal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; z-index:100 }
+.modal-content { background:#333; padding:30px; border-radius:10px; text-align:center }
+#playerName { padding:10px; margin:10px; font-size:16px; border:none; border-radius:5px }
+#joinBtn { padding:10px 20px; font-size:16px; background:#4a4; color:#fff; border:none; border-radius:5px; cursor:pointer }
+.player-list { position:absolute; top:10px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); padding:10px; border-radius:5px; max-width:400px }
+</style>
 </head>
 <body>
 <div id="gameContainer">
-  <canvas id="game" width="800" height="600"></canvas>
+  <canvas id="game"></canvas>
   <div id="ui">
     <div>Монеты: <span id="coins">0</span></div>
     <div>HP: <span id="hp">100</span></div>
+    <div id="playerName"></div>
   </div>
-  <div id="controls">
-    <div>WASD - движение | Пробел - атака</div>
-    <div>Собирай монеты, избегай врагов! R - рестарт</div>
-  </div>
+  <canvas id="minimap"></canvas>
+  <div id="controls">WASD - движение | Пробел - атака</div>
+  <div id="playerList" class="player-list"></div>
 </div>
 
-<div id="gameOverModal" class="modal">
+<div id="nameModal">
   <div class="modal-content">
-    <h2>GAME OVER</h2>
-    <p>Собрано монет: <span id="finalScore">0</span></p>
-    <div id="nameForm">
-      <input type="text" id="playerName" placeholder="Введите имя" maxlength="20">
-      <button id="saveScore">Сохранить результат</button>
-    </div>
-    <div id="leaderboard">
-      <h3>Лучшие результаты:</h3>
-      <ol id="scoresList"></ol>
-    </div>
-    <button id="restartBtn">Играть снова (R)</button>
+    <h2>Добро пожаловать!</h2>
+    <input type="text" id="playerNameInput" placeholder="Введите имя" maxlength="15">
+    <br><button id="joinBtn">Присоединиться</button>
   </div>
 </div>
 
