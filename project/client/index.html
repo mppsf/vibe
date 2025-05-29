@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Multiplayer Game</title>
@@ -22,7 +23,7 @@ body { background:#111; color:#fff; font-family:Arial; overflow:hidden }
 <body>
 <div id="gameContainer">
   <canvas id="game"></canvas>
-  <div id="ui">
+  <div id="ui"> 
     <div>Монеты: <span id="coins">0</span></div>
     <div>HP: <span id="hp">100</span></div>
     <div id="playerName"></div>
@@ -40,7 +41,6 @@ body { background:#111; color:#fff; font-family:Arial; overflow:hidden }
   </div>
 </div>
 
-<script src="js/api.js"></script>
-<script src="js/game.js"></script>
+  <script src="js/game.js"></script>
 </body>
 </html>

@@ -1,5 +1,18 @@
 class Game {
   constructor() {
+     // Проверка подключения
+    try {
+      this.socket = io();
+      this.socket.on('connect', () => console.log('Socket подключен'));
+      this.socket.on('connect_error', (error) => {
+        console.error('Ошибка подключения:', error);
+        alert('Сервер недоступен. Запустите серверную часть.');
+      });
+    } catch (error) {
+      console.error('Socket.IO не найден:', error);
+      alert('Socket.IO библиотека не загружена. Проверьте js/api.js');
+      return;
+    }
     this.canvas = document.getElementById('game');
     this.ctx = this.canvas.getContext('2d');
     this.minimap = document.getElementById('minimap');
