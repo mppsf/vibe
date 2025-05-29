@@ -26,7 +26,7 @@ class Game {
     
     this.playerId = null;
     this.WORLD_SIZE = 4000;
-    this.MAP_SCALE = 160 / this.WORLD_SIZE;
+    this.MAP_SCALE = 230 / this.WORLD_SIZE;
     
     this.state = {
       camera: {x: 0, y: 0},
@@ -38,6 +38,11 @@ class Game {
       droppedCoins: [],
       keys: {},
       attackEffect: null,
+      attackCooldown: {
+        active: false,
+        startTime: 0,
+        duration: 500
+      },
       stats: {
         kills: 0,
         mobKills: 0,
@@ -72,16 +77,32 @@ class Game {
     this.canvas.height = window.innerHeight;
   }
 
+  canAttack() {
+    return !this.state.attackCooldown.active;
+  }
+
+  startAttack() {
+    if (!this.canAttack() || !this.state.myPlayer) return false;
+    
+    this.startAttackEffect();
+    this.startAttackCooldown();
+    return true;
+  }
+
   startAttackEffect() {
     if (!this.state.myPlayer) return;
     this.state.attackEffect = {
-      x: this.state.myPlayer.x,
-      y: this.state.myPlayer.y,
       radius: 0,
-      maxRadius: 40,
+      maxRadius: 60,
       duration: 300,
       startTime: Date.now()
     };
+  }
+
+  startAttackCooldown() {
+    this.state.attackCooldown.active = true;
+    this.state.attackCooldown.startTime = Date.now();
+    document.getElementById('attackCooldown').style.display = 'block';
   }
 
   updateAttackEffect() {
@@ -96,6 +117,24 @@ class Game {
     }
     
     this.state.attackEffect.radius = this.state.attackEffect.maxRadius * progress;
+  }
+
+  updateAttackCooldown() {
+    if (!this.state.attackCooldown.active) return;
+    
+    const elapsed = Date.now() - this.state.attackCooldown.startTime;
+    const progress = elapsed / this.state.attackCooldown.duration;
+    
+    if (progress >= 1) {
+      this.state.attackCooldown.active = false;
+      document.getElementById('attackCooldown').style.display = 'none';
+      return;
+    }
+    
+    const progressBar = document.querySelector('.cooldown-progress');
+    if (progressBar) {
+      progressBar.style.width = `${(1 - progress) * 100}%`;
+    }
   }
 
   addKill(type = 'player') {
@@ -125,6 +164,7 @@ class Game {
     this.modules.input.update();
     this.updateCamera();
     this.updateAttackEffect();
+    this.updateAttackCooldown();
     this.modules.renderer.draw();
     requestAnimationFrame(() => this.gameLoop());
   }
