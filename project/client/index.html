@@ -291,7 +291,6 @@ body {
   transform: translateY(1px);
 }
 
-/* Плавные анимации появления */
 @keyframes slideInLeft {
   from { transform: translateX(-50px); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
@@ -332,7 +331,6 @@ body {
   animation: slideInBottom 0.4s ease 0.1s both;
 }
 
-/* Простые эффекты наведения */
 #ui, #minimap, #onlinePlayersList, #controlsGuide, #gameStats {
   transition: transform 0.2s ease;
 }
@@ -401,6 +399,10 @@ body {
   </div>
 </div>
 
+<script src="js/gameRenderer.js"></script>
+<script src="js/inputHandler.js"></script>
+<script src="js/networkManager.js"></script>
+<script src="js/uiManager.js"></script>
 <script src="js/game.js"></script>
 </body>
 </html>
