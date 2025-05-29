@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   multiplayer-game:
     build: .
@@ -9,21 +10,19 @@ services:
       - PORT=3000
     networks:
       - game-network
-    # не нужно пробрасывать порты наружу, т.к. доступ через ngrok
-    # но можно оставить для локальной отладки:
     ports:
-      - "3000:3000"
+      - "3000:3000" # для локальной отладки, можно убрать если не нужен
     restart: unless-stopped
 
   ngrok:
-    image: wernight/ngrok:latest
+    image: ngrok/ngrok:latest
+    command: http multiplayer-game:3000 --log=stdout
     depends_on:
       - multiplayer-game
     ports:
-      - "4040:4040"
+      - "4040:4040"  # для доступа к ngrok веб-интерфейсу
     environment:
-      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
-      NGROK_PORT: multiplayer-game:3000
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}  # укажи свой токен в .env
     restart: unless-stopped
     networks:
       - game-network

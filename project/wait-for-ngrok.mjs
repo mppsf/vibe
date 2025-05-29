@@ -1,7 +1,6 @@
 // wait-for-ngrok.mjs
 import { setTimeout as delay } from 'timers/promises';
 import http from 'http';
-import { spawn } from 'child_process';
 
 const getNgrokUrl = async () => {
   return new Promise((resolve, reject) => {
@@ -35,10 +34,5 @@ while (!publicUrl || publicUrl === 'null') {
 
 console.log('[entrypoint] ngrok URL detected:', publicUrl);
 
-// Устанавливаем переменную окружения и запускаем n8n
+// Устанавливаем переменную окружения 
 process.env.WEBHOOK_URL = publicUrl;
-
-spawn('n8n', ['start'], {
-  stdio: 'inherit',
-  env: process.env,
-});
