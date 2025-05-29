@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2D Game - Leaderboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="gameContainer">
+  <canvas id="game" width="800" height="600"></canvas>
+  <div id="ui">
+    <div>Монеты: <span id="coins">0</span></div>
+    <div>HP: <span id="hp">100</span></div>
+  </div>
+  <div id="controls">
+    <div>WASD - движение | Пробел - атака</div>
+    <div>Собирай монеты, избегай врагов! R - рестарт</div>
+  </div>
+</div>
+
+<div id="gameOverModal" class="modal">
+  <div class="modal-content">
+    <h2>GAME OVER</h2>
+    <p>Собрано монет: <span id="finalScore">0</span></p>
+    <div id="nameForm">
+      <input type="text" id="playerName" placeholder="Введите имя" maxlength="20">
+      <button id="saveScore">Сохранить результат</button>
+    </div>
+    <div id="leaderboard">
+      <h3>Лучшие результаты:</h3>
+      <ol id="scoresList"></ol>
+    </div>
+    <button id="restartBtn">Играть снова (R)</button>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
