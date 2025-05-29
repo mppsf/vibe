@@ -2,13 +2,28 @@ version: '3.8'
 services:
   multiplayer-game:
     build: .
-    ports:
-      - "3000:3000"
     volumes:
       - ./data:/app/data
     environment:
       - NODE_ENV=production
       - PORT=3000
+    networks:
+      - game-network
+    # не нужно пробрасывать порты наружу, т.к. доступ через ngrok
+    # но можно оставить для локальной отладки:
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+  ngrok:
+    image: wernight/ngrok:latest
+    depends_on:
+      - multiplayer-game
+    ports:
+      - "4040:4040"
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+      NGROK_PORT: multiplayer-game:3000
     restart: unless-stopped
     networks:
       - game-network
@@ -16,6 +31,3 @@ services:
 networks:
   game-network:
     driver: bridge
-
-volumes:
-  game-data:

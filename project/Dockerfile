@@ -1,9 +1,15 @@
 FROM node:18-alpine
+
 WORKDIR /app
-COPY server/package*.json ./
-RUN npm ci --only=production
-COPY server/ ./
-COPY client/ ./client/
-RUN mkdir -p data
-EXPOSE 3000
-CMD ["node", "app.js"]
+
+# Копируем серверные файлы
+COPY server/package*.json ./server/
+WORKDIR /app/server
+RUN npm install --omit=dev
+
+# Копируем весь проект (и client, и server)
+WORKDIR /app
+COPY . .
+
+# Убедись, что wait-for-ngrok.mjs имеет shebang или явно запускается через node
+CMD ["sh", "-c", "node wait-for-ngrok.mjs && node server/app.js"]
