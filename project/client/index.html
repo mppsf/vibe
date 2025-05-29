@@ -13,9 +13,9 @@
 }
 
 body { 
-  background: #1a1a1a; 
+  background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0f0f0f 100%);
   color: #e0e0e0; 
-  font-family: 'Courier New', monospace;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   overflow: hidden;
   user-select: none;
 }
@@ -28,7 +28,7 @@ body {
 
 #game { 
   display: block; 
-  background: #2d2d2d;
+  background: #1a1a1a;
   border: 2px solid #404040;
 }
 
@@ -37,52 +37,171 @@ body {
   top: 15px; 
   left: 15px; 
   z-index: 10; 
-  background: rgba(20, 20, 20, 0.9);
-  padding: 12px 16px;
-  border: 1px solid #555;
-  border-radius: 4px;
+  background: rgba(25, 25, 25, 0.95);
+  padding: 14px 18px;
+  border: 1px solid #4CAF50;
+  border-radius: 8px;
   font-size: 14px;
-  font-weight: bold;
-  min-width: 140px;
+  font-weight: 600;
+  min-width: 150px;
+  backdrop-filter: blur(5px);
 }
 
 #ui div {
-  margin: 3px 0;
+  margin: 5px 0;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 #ui span {
   color: #4CAF50;
+  font-weight: bold;
 }
 
 #playerName {
   margin-top: 8px; 
   font-size: 12px; 
-  opacity: 0.8;
+  opacity: 0.9;
+  color: #81C784;
 }
 
 #minimap { 
   position: absolute; 
   top: 15px; 
   right: 15px; 
-  width: 160px; 
-  height: 160px; 
-  background: rgba(20, 20, 20, 0.9);
-  border: 2px solid #555;
-  border-radius: 4px;
+  width: 170px; 
+  height: 170px; 
+  background: rgba(25, 25, 25, 0.95);
+  border: 1px solid #2196F3;
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
 }
 
-#controls { 
+#onlinePlayersList { 
+  position: absolute; 
+  top: 15px; 
+  left: 50%; 
+  transform: translateX(-50%);
+  background: rgba(25, 25, 25, 0.95);
+  padding: 14px 18px;
+  border: 1px solid #FF9800;
+  border-radius: 8px;
+  max-width: 400px;
+  font-size: 13px;
+  backdrop-filter: blur(5px);
+  min-width: 280px;
+}
+
+.players-header {
+  text-align: center;
+  color: #FF9800;
+  font-weight: bold;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.player-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 6px 0;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  border-left: 2px solid #4CAF50;
+  transition: background 0.2s ease;
+}
+
+.player-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.player-item.me {
+  border-left-color: #2196F3;
+  background: rgba(33, 150, 243, 0.1);
+}
+
+.player-name {
+  color: #e0e0e0;
+  font-weight: 600;
+}
+
+.player-stats {
+  color: #4CAF50;
+  font-weight: bold;
+  display: flex;
+  gap: 8px;
+}
+
+#controlsGuide { 
   position: absolute; 
   bottom: 15px; 
   left: 15px; 
-  font-size: 11px; 
-  opacity: 0.8;
-  background: rgba(20, 20, 20, 0.7);
-  padding: 8px 12px;
+  font-size: 12px; 
+  background: rgba(25, 25, 25, 0.95);
+  padding: 14px 18px;
+  border-radius: 8px;
+  border: 1px solid #9C27B0;
+  backdrop-filter: blur(5px);
+  max-width: 260px;
+}
+
+.controls-header {
+  color: #9C27B0;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.control-item {
+  display: flex;
+  justify-content: space-between;
+  margin: 4px 0;
+  padding: 2px 0;
+}
+
+.control-key {
+  color: #FFB74D;
+  font-weight: bold;
+  background: rgba(255, 183, 77, 0.15);
+  padding: 2px 6px;
   border-radius: 4px;
-  border: 1px solid #404040;
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.control-desc {
+  color: #B0BEC5;
+}
+
+#gameStats {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  background: rgba(25, 25, 25, 0.95);
+  padding: 14px 18px;
+  border-radius: 8px;
+  border: 1px solid #E91E63;
+  backdrop-filter: blur(5px);
+  font-size: 12px;
+  min-width: 140px;
+}
+
+.stats-header {
+  color: #E91E63;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  margin: 4px 0;
+}
+
+.stat-value {
+  color: #4CAF50;
+  font-weight: bold;
 }
 
 #nameModal { 
@@ -92,19 +211,32 @@ body {
   width: 100%; 
   height: 100%; 
   background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
   display: flex; 
   align-items: center; 
   justify-content: center; 
   z-index: 100;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal-content { 
-  background: #2d2d2d;
+  background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
   padding: 40px;
-  border: 2px solid #555;
-  border-radius: 8px;
+  border: 2px solid #4CAF50;
+  border-radius: 12px;
   text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transform: scale(0.9);
+  animation: modalIn 0.3s ease forwards;
+}
+
+@keyframes modalIn {
+  to { transform: scale(1); }
 }
 
 .modal-content h2 {
@@ -113,109 +245,159 @@ body {
   font-size: 24px;
 }
 
+.modal-content p {
+  margin-bottom: 16px; 
+  color: #B0BEC5;
+  font-size: 14px;
+}
+
 #playerNameInput { 
-  padding: 12px 16px;
-  margin: 15px 0;
+  padding: 14px 18px;
+  margin: 16px 0;
   font-size: 16px;
-  background: #404040;
+  background: rgba(64, 64, 64, 0.8);
   color: #e0e0e0;
   border: 1px solid #666;
-  border-radius: 4px;
-  width: 200px;
+  border-radius: 8px;
+  width: 220px;
   font-family: inherit;
+  transition: border-color 0.2s ease;
 }
 
 #playerNameInput:focus {
   outline: none;
   border-color: #4CAF50;
-  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
 #joinBtn { 
-  padding: 12px 24px;
+  padding: 14px 28px;
   font-size: 16px;
-  background: #4CAF50;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-family: inherit;
   font-weight: bold;
-  transition: background 0.2s;
+  transition: background 0.2s ease;
   margin-top: 10px;
 }
 
 #joinBtn:hover {
-  background: #45a049;
+  background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
 }
 
 #joinBtn:active {
-  background: #3d8b40;
+  transform: translateY(1px);
 }
 
-.player-list { 
-  position: absolute; 
-  top: 15px; 
-  left: 50%; 
-  transform: translateX(-50%);
-  background: rgba(20, 20, 20, 0.9);
-  padding: 12px 16px;
-  border: 1px solid #555;
-  border-radius: 4px;
-  max-width: 400px;
-  font-size: 12px;
-  display: none;
+/* Плавные анимации появления */
+@keyframes slideInLeft {
+  from { transform: translateX(-50px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
-.player-item {
-  display: flex;
-  justify-content: space-between;
-  margin: 2px 0;
-  padding: 2px 0;
+@keyframes slideInRight {
+  from { transform: translateX(50px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
-.player-name {
-  color: #e0e0e0;
+@keyframes slideInTop {
+  from { transform: translate(-50%, -50px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
 }
 
-.player-stats {
-  color: #4CAF50;
+@keyframes slideInBottom {
+  from { transform: translateY(50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
-/* Улучшенная визуализация */
-#game::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    radial-gradient(circle at 20% 20%, rgba(76, 175, 80, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(255, 193, 7, 0.05) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: 1;
+#ui {
+  animation: slideInLeft 0.4s ease;
+}
+
+#minimap {
+  animation: slideInRight 0.4s ease;
+}
+
+#onlinePlayersList {
+  animation: slideInTop 0.4s ease;
+}
+
+#controlsGuide {
+  animation: slideInBottom 0.4s ease;
+}
+
+#gameStats {
+  animation: slideInBottom 0.4s ease 0.1s both;
+}
+
+/* Простые эффекты наведения */
+#ui, #minimap, #onlinePlayersList, #controlsGuide, #gameStats {
+  transition: transform 0.2s ease;
+}
+
+#ui:hover, #minimap:hover, #onlinePlayersList:hover, #controlsGuide:hover, #gameStats:hover {
+  transform: translateY(-2px);
 }
 </style>
 </head>
 <body>
 <div id="gameContainer">
   <canvas id="game"></canvas>
+  
   <div id="ui"> 
-    <div>Монеты: <span id="coins">0</span></div>
-    <div>HP: <span id="hp">100</span></div>
+    <div>💰 Монеты: <span id="coins">0</span></div>
+    <div>❤️ HP: <span id="hp">100</span></div>
     <div id="playerName"></div>
   </div>
+  
   <canvas id="minimap"></canvas>
-  <div id="controls">WASD - движение | Пробел - атака</div>
-  <div id="playerList" class="player-list"></div>
+  
+  <div id="onlinePlayersList">
+    <div class="players-header">🎮 Игроки онлайн</div>
+    <div id="playerListContent"></div>
+  </div>
+
+  <div id="controlsGuide">
+    <div class="controls-header">🎯 Управление</div>
+    <div class="control-item">
+      <span class="control-key">WASD</span>
+      <span class="control-desc">Движение</span>
+    </div>
+    <div class="control-item">
+      <span class="control-key">SPACE</span>
+      <span class="control-desc">Атака</span>
+    </div>
+    <div class="control-item">
+      <span class="control-key">TAB</span>
+      <span class="control-desc">Список игроков</span>
+    </div>
+  </div>
+
+  <div id="gameStats">
+    <div class="stats-header">📊 Статистика</div>
+    <div class="stat-item">
+      <span>Убийств:</span>
+      <span class="stat-value" id="killCount">0</span>
+    </div>
+    <div class="stat-item">
+      <span>Смертей:</span>
+      <span class="stat-value" id="deathCount">0</span>
+    </div>
+    <div class="stat-item">
+      <span>Время:</span>
+      <span class="stat-value" id="gameTime">00:00</span>
+    </div>
+  </div>
 </div>
 
 <div id="nameModal">
   <div class="modal-content">
-    <h2>Добро пожаловать!</h2>
+    <h2>🎮 Добро пожаловать!</h2>
+    <p>Введите имя для входа в игру</p>
     <input type="text" id="playerNameInput" placeholder="Введите имя" maxlength="15">
-    <br><button id="joinBtn">Присоединиться</button>
+    <br><button id="joinBtn">🚀 Присоединиться</button>
   </div>
 </div>
 
