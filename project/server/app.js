@@ -3,6 +3,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
@@ -13,7 +14,12 @@ const WORLD_SIZE = 4000;
 const TICK_RATE = 60;
 
 app.use(express.static(path.join(__dirname, '../client')));
-const db = new sqlite3.Database('game.db');
+
+const dataDir = path.join(__dirname, '../data');
+if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+
+const dbPath = path.join(dataDir, 'game.db');
+const db = new sqlite3.Database(dbPath);
 
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS scores (
@@ -81,7 +87,6 @@ function findClosestPlayer(enemy) {
 function updateGame() {
   const now = Date.now();
   
-  // Враги
   for (let [enemyId, enemy] of gameState.enemies) {
     if (enemy.hp <= 0) {
       gameState.enemies.delete(enemyId);
@@ -121,7 +126,6 @@ function updateGame() {
     }
   }
 
-  // Пули
   for (let [bulletId, bullet] of gameState.bullets) {
     bullet.x += bullet.vx;
     bullet.y += bullet.vy;
@@ -141,7 +145,6 @@ function updateGame() {
     }
   }
 
-  // Респавн врагов
   if (gameState.enemies.size < 10) {
     const types = [
       { type: 'basic', hp: 40, speed: 1.2, size: 18, damage: 12, color: '#f44' },
@@ -175,7 +178,9 @@ function handlePlayerDeath(player) {
 
   if (player.coins > 0) {
     const stmt = db.prepare('INSERT INTO scores (player_name, score) VALUES (?, ?)');
-    stmt.run(player.name, player.coins);
+    stmt.run(player.name, player.coins, (err) => {
+      if (err) console.error('DB insert error:', err);
+    });
     stmt.finalize();
   }
 
@@ -297,9 +302,13 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/index.html'));
 });
 
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', players: gameState.players.size });
+});
+
 generateCoins();
 generateEnemies();
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`Multiplayer server running on port ${PORT}`);
 });

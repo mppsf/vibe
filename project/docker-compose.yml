@@ -11,18 +11,25 @@ services:
     networks:
       - game-network
     ports:
-      - "3000:3000" # для локальной отладки, можно убрать если не нужен
+      - "3000:3000"
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
 
   ngrok:
     image: ngrok/ngrok:latest
     command: http multiplayer-game:3000 --log=stdout
     depends_on:
-      - multiplayer-game
+      multiplayer-game:
+        condition: service_healthy
     ports:
-      - "4040:4040"  # для доступа к ngrok веб-интерфейсу
+      - "4040:4040"
     environment:
-      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}  # укажи свой токен в .env
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
     restart: unless-stopped
     networks:
       - game-network

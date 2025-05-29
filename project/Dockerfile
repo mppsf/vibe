@@ -1,20 +1,12 @@
-# Используем легковесный Node.js образ
-FROM node:18-alpine
+FROM node:18
 
-# Рабочая директория внутри контейнера
+RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app/server
-
-# Копируем package.json и package-lock.json из папки server для установки зависимостей
 COPY server/package*.json ./
-
-# Устанавливаем только production-зависимости (без dev)
 RUN npm install --omit=dev
 
-# Возвращаемся в корень /app
 WORKDIR /app
-
-# Копируем весь проект (client, server и другие файлы)
 COPY . .
 
-# Запускаем сначала скрипт ожидания ngrok, затем сервер
-CMD ["sh", "-c", "node wait-for-ngrok.mjs && node server/app.js"]
+CMD ["node", "server/app.js"]

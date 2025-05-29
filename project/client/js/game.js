@@ -70,6 +70,7 @@ class Game {
         document.getElementById('coins').textContent = myPlayer.coins;
         document.getElementById('hp').textContent = Math.max(0, myPlayer.hp);
       }
+      this.updatePlayerList();
     });
 
     this.socket.on('death', data => {
