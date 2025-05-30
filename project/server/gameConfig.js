@@ -1,6 +1,7 @@
 const GAME_CONFIG = {
   WORLD_SIZE: 4000,
   TICK_RATE: 60,
+  MAP_SCALE: 0.15,
   
   PLAYER: {
     SIZE: 20,
@@ -13,7 +14,8 @@ const GAME_CONFIG = {
     MELEE: {
       COOLDOWN: 500,
       RANGE: 60,
-      DAMAGE: 25
+      DAMAGE: 25,
+      EFFECT_DURATION: 200
     },
     RANGED: {
       COOLDOWN: 1000,
@@ -22,6 +24,29 @@ const GAME_CONFIG = {
       BULLET_LIFE: 120,
       BULLET_SIZE: 6
     }
+  },
+  
+  // Обратная совместимость для клиента
+  MELEE_ATTACK: {
+    COOLDOWN: 500,
+    RANGE: 60,
+    DAMAGE: 25,
+    EFFECT_DURATION: 200
+  },
+  
+  RANGED_ATTACK: {
+    COOLDOWN: 1000,
+    DAMAGE: 15,
+    BULLET_SPEED: 8,
+    BULLET_LIFE: 120,
+    BULLET_SIZE: 6
+  },
+  
+  CONTROLS: {
+    w: { dx: 0, dy: -1 },
+    s: { dx: 0, dy: 1 },
+    a: { dx: -1, dy: 0 },
+    d: { dx: 1, dy: 0 }
   },
   
   ENEMIES: {

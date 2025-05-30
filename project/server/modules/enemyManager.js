@@ -41,6 +41,10 @@ class EnemyManager {
     return closest;
   }
 
+  getMeleeRange(enemy) {
+    return Math.max(enemy.size + 15, 25);
+  }
+
   update(players, bulletManager, coinManager) {
     const now = Date.now();
     
@@ -57,6 +61,7 @@ class EnemyManager {
       const dist = this.distance(enemy, target);
       const dx = target.x - enemy.x;
       const dy = target.y - enemy.y;
+      const meleeRange = this.getMeleeRange(enemy);
 
       if (enemy.type === 'shooter' && dist < enemy.shootRange && now - enemy.lastShot > enemy.shootCooldown) {
         bulletManager.createBullet({
@@ -77,7 +82,7 @@ class EnemyManager {
         
         if (enemy.type === 'runner' && dist < enemy.fleeDistance) {
           moveSpeed = -enemy.speed;
-        } else if (dist <= GAME_CONFIG.ENEMIES.MELEE_RANGE) {
+        } else if (dist <= meleeRange) {
           shouldMove = false;
         }
         
@@ -90,7 +95,7 @@ class EnemyManager {
       enemy.x = Math.max(50, Math.min(GAME_CONFIG.WORLD_SIZE - 50, enemy.x));
       enemy.y = Math.max(50, Math.min(GAME_CONFIG.WORLD_SIZE - 50, enemy.y));
 
-      if (dist < GAME_CONFIG.ENEMIES.MELEE_RANGE && now - enemy.lastHit > GAME_CONFIG.ENEMIES.ATTACK_COOLDOWN) {
+      if (dist < meleeRange && now - enemy.lastHit > GAME_CONFIG.ENEMIES.ATTACK_COOLDOWN) {
         target.hp -= enemy.damage;
         enemy.lastHit = now;
         if (target.hp <= 0) {

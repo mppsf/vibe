@@ -10,16 +10,16 @@ const GAME_CONFIG = {
   
   // Атаки (синхронизировано с сервером)
   MELEE_ATTACK: {
-    COOLDOWN: 500,
+    COOLDOWN: 300,
     RANGE: 60,
     DAMAGE: 25,
     EFFECT_DURATION: 300
   },
   
   RANGED_ATTACK: {
-    COOLDOWN: 1000,
+    COOLDOWN: 700,
     RANGE: 300,
-    DAMAGE: 15,
+    DAMAGE: 60,
     BULLET_SPEED: 8,
     BULLET_SIZE: 6,
     BULLET_LIFE: 120 // добавлено для синхронизации

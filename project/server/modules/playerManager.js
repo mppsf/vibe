@@ -12,6 +12,7 @@ class PlayerManager {
       x: Math.random() * (GAME_CONFIG.WORLD_SIZE - 200) + 100,
       y: Math.random() * (GAME_CONFIG.WORLD_SIZE - 200) + 100,
       hp: GAME_CONFIG.PLAYER.MAX_HP,
+      maxHp: GAME_CONFIG.PLAYER.MAX_HP,
       coins: 0,
       lastMeleeAttack: 0,
       lastRangedAttack: 0
