@@ -8,7 +8,6 @@ class NetworkManager {
       console.log('Подключен к игре:', data);
       this.game.playerId = data.playerId;
       
-      // Обновляем размер мира если пришел от сервера
       if (data.worldSize) {
         this.game.WORLD_SIZE = data.worldSize;
       }
@@ -42,7 +41,6 @@ class NetworkManager {
       }
     });
 
-    // Обработка ошибок
     this.game.socket.on('error', (error) => {
       console.error('Ошибка игры:', error);
       alert('Ошибка игры: ' + error);
@@ -53,32 +51,27 @@ class NetworkManager {
       alert('Соединение с сервером потеряно. Обновите страницу.');
     });
 
-    // Обновление статистики каждую секунду
     setInterval(() => {
       this.game.modules.ui.updateStats();
     }, 1000);
   }
 
   handleGameState(data) {
-    // Обработка массива игроков
     if (data.players && Array.isArray(data.players)) {
       this.game.state.players = new Map(data.players.map(p => [p.id, p]));
     }
     
-    // Обработка других игровых объектов
     this.game.state.coins = data.coins || [];
     this.game.state.enemies = data.enemies || [];
     this.game.state.bullets = data.bullets || [];
     this.game.state.droppedCoins = data.droppedCoins || [];
     
-    // Обновление данных текущего игрока
     const myPlayer = this.game.state.players.get(this.game.playerId);
     if (myPlayer) {
       this.game.state.myPlayer = myPlayer;
       this.game.modules.ui.updatePlayerStats();
     }
     
-    // Обновление списка игроков
     this.game.modules.ui.updatePlayerList();
   }
 }

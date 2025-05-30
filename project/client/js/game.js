@@ -27,6 +27,7 @@ class Game {
     this.playerId = null;
     this.WORLD_SIZE = GAME_CONFIG.WORLD_SIZE;
     this.MAP_SCALE = GAME_CONFIG.MAP_SCALE;
+    this.gameStarted = false;
     
     this.state = {
       camera: {x: 0, y: 0},
@@ -76,12 +77,15 @@ class Game {
     this.modules.input.setup();
     this.modules.network.setup();
     this.modules.ui.showNameModal();
-    startGameLoop() 
-    console.log('Запуск игрового цикла');
-    this.gameLoop();
-  
 
     window.addEventListener('resize', () => this.resize());
+  }
+
+  startGameLoop() {
+    if (this.gameStarted) return;
+    this.gameStarted = true;
+    console.log('Запуск игрового цикла');
+    this.gameLoop();
   }
 
   resize() {
@@ -182,6 +186,8 @@ class Game {
   }
 
   gameLoop() {
+    if (!this.gameStarted) return;
+    
     this.modules.input.update();
     this.updateCamera();
     this.updateAttackEffect();
