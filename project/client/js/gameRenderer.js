@@ -103,18 +103,18 @@ class GameRenderer {
     [...this.game.state.coins, ...this.game.state.droppedCoins].forEach(coin => {
       const x = coin.x - cam.x;
       const y = coin.y - cam.y;
-      if (x > -20 && x < this.game.canvas.width + 20 && y > -20 && y < this.game.canvas.height + 20) {
+      if (x > -30 && x < this.game.canvas.width + 30 && y > -30 && y < this.game.canvas.height + 30) {
         this.ctx.shadowColor = '#ffd700';
-        this.ctx.shadowBlur = 15;
+        this.ctx.shadowBlur = 20;
         this.ctx.fillStyle = '#ffd700';
         this.ctx.beginPath();
-        this.ctx.arc(x, y, 8, 0, Math.PI * 2);
+        this.ctx.arc(x, y, 12, 0, Math.PI * 2);
         this.ctx.fill();
         
         this.ctx.shadowBlur = 0;
         this.ctx.fillStyle = '#ffed4e';
         this.ctx.beginPath();
-        this.ctx.arc(x, y, 5, 0, Math.PI * 2);
+        this.ctx.arc(x, y, 8, 0, Math.PI * 2);
         this.ctx.fill();
       }
     });
@@ -124,14 +124,15 @@ class GameRenderer {
     this.game.state.enemies.forEach(enemy => {
       const x = enemy.x - cam.x;
       const y = enemy.y - cam.y;
-      if (x > -30 && x < this.game.canvas.width + 30 && y > -30 && y < this.game.canvas.height + 30) {
+      const size = (enemy.size || 20) * 1.5;
+      if (x > -45 && x < this.game.canvas.width + 45 && y > -45 && y < this.game.canvas.height + 45) {
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-        this.ctx.fillRect(x - enemy.size/2 + 2, y - enemy.size/2 + 2, enemy.size, enemy.size);
+        this.ctx.fillRect(x - size/2 + 3, y - size/2 + 3, size, size);
         
         this.ctx.fillStyle = enemy.color || '#ff6b6b';
-        this.ctx.fillRect(x - enemy.size/2, y - enemy.size/2, enemy.size, enemy.size);
+        this.ctx.fillRect(x - size/2, y - size/2, size, size);
         
-        this.drawHealthBar(x, y, enemy.hp || 0, enemy.maxHp || 100);
+        this.drawHealthBar(x, y, enemy.hp || 0, enemy.maxHp || 100, size);
       }
     });
   }
@@ -142,10 +143,10 @@ class GameRenderer {
       const y = bullet.y - cam.y;
       
       this.ctx.fillStyle = 'rgba(255, 255, 0, 0.3)';
-      this.ctx.fillRect(x - 4, y - 4, 8, 8);
+      this.ctx.fillRect(x - 6, y - 6, 12, 12);
       
       this.ctx.fillStyle = '#ffff00';
-      this.ctx.fillRect(x - 2, y - 2, 4, 4);
+      this.ctx.fillRect(x - 3, y - 3, 6, 6);
     });
   }
 
@@ -153,57 +154,58 @@ class GameRenderer {
     this.game.state.players.forEach(player => {
       const x = player.x - cam.x;
       const y = player.y - cam.y;
-      if (x > -30 && x < this.game.canvas.width + 30 && y > -30 && y < this.game.canvas.height + 30) {
+      if (x > -45 && x < this.game.canvas.width + 45 && y > -45 && y < this.game.canvas.height + 45) {
         const isMe = player.id === this.game.playerId;
-        const size = 20;
+        const size = 30;
         
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-        this.ctx.fillRect(x - size/2 + 2, y - size/2 + 2, size, size);
+        this.ctx.fillRect(x - size/2 + 3, y - size/2 + 3, size, size);
         
         if (isMe) {
           this.ctx.shadowColor = '#2196F3';
-          this.ctx.shadowBlur = 10;
+          this.ctx.shadowBlur = 15;
         }
         
         this.ctx.fillStyle = isMe ? '#2196F3' : '#ff6b6b';
         this.ctx.fillRect(x - size/2, y - size/2, size, size);
         this.ctx.shadowBlur = 0;
         
-        this.drawHealthBar(x, y, Math.max(0, player.hp || 0), 100);
+        this.drawHealthBar(x, y, Math.max(0, player.hp || 0), 100, size);
         
         this.ctx.fillStyle = '#fff';
-        this.ctx.font = 'bold 12px Courier New';
+        this.ctx.font = 'bold 14px Courier New';
         this.ctx.textAlign = 'center';
         this.ctx.strokeStyle = '#000';
         this.ctx.lineWidth = 2;
-        this.ctx.strokeText(player.name || 'Игрок', x, y + 30);
-        this.ctx.fillText(player.name || 'Игрок', x, y + 30);
+        this.ctx.strokeText(player.name || 'Игрок', x, y + 35);
+        this.ctx.fillText(player.name || 'Игрок', x, y + 35);
       }
     });
   }
 
-  drawHealthBar(x, y, hp, maxHp) {
-    const barWidth = 26;
-    const barHeight = 5;
+  drawHealthBar(x, y, hp, maxHp, entitySize = 20) {
+    const barWidth = entitySize + 10;
+    const barHeight = 6;
+    const offsetY = entitySize / 2 + 8;
     
     this.ctx.fillStyle = '#333';
-    this.ctx.fillRect(x - barWidth/2, y - 20, barWidth, barHeight);
+    this.ctx.fillRect(x - barWidth/2, y - offsetY, barWidth, barHeight);
     
     const hpPercent = hp / maxHp;
     this.ctx.fillStyle = hpPercent > 0.5 ? '#4CAF50' : hpPercent > 0.25 ? '#FF9800' : '#F44336';
-    this.ctx.fillRect(x - barWidth/2, y - 20, hpPercent * barWidth, barHeight);
+    this.ctx.fillRect(x - barWidth/2, y - offsetY, hpPercent * barWidth, barHeight);
     
     this.ctx.strokeStyle = '#666';
     this.ctx.lineWidth = 1;
-    this.ctx.strokeRect(x - barWidth/2, y - 20, barWidth, barHeight);
+    this.ctx.strokeRect(x - barWidth/2, y - offsetY, barWidth, barHeight);
   }
 
   drawAttackEffect() {
-    if (!this.game.state.attackEffect) return;
+    if (!this.game.state.attackEffect || !this.game.state.myPlayer) return;
     
     const effect = this.game.state.attackEffect;
-    const x = effect.x - this.game.state.camera.x;
-    const y = effect.y - this.game.state.camera.y;
+    const x = this.game.state.myPlayer.x - this.game.state.camera.x;
+    const y = this.game.state.myPlayer.y - this.game.state.camera.y;
     
     const alpha = 1 - (effect.radius / effect.maxRadius);
     this.ctx.globalAlpha = alpha * 0.6;
@@ -255,5 +257,3 @@ class GameRenderer {
     }
   }
 }
-
-
