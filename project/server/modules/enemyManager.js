@@ -13,8 +13,20 @@ class EnemyManager {
     }
   }
 
+  getRandomEnemyType() {
+    const totalChance = GAME_CONFIG.ENEMIES.TYPES.reduce((sum, type) => sum + type.spawnChance, 0);
+    let random = Math.random() * totalChance;
+    
+    for (let type of GAME_CONFIG.ENEMIES.TYPES) {
+      random -= type.spawnChance;
+      if (random <= 0) return type;
+    }
+    
+    return GAME_CONFIG.ENEMIES.TYPES[0];
+  }
+
   spawnEnemy() {
-    const template = GAME_CONFIG.ENEMIES.TYPES[Math.floor(Math.random() * GAME_CONFIG.ENEMIES.TYPES.length)];
+    const template = this.getRandomEnemyType();
     const id = this.nextId++;
     this.enemies.set(id, {
       ...template, 

@@ -37,7 +37,7 @@ const GAME_CONFIG = {
       { type: 'fast', hp: 30, speed: 2.5, size: 16, damage: 8, color: '#84f', dropChance: 0.2 },
       { type: 'shooter', hp: 25, speed: 0.8, size: 18, damage: 15, color: '#4a4', shootCooldown: 1500, shootRange: 300, dropChance: 0.3 },
       { type: 'tank', hp: 80, speed: 0.6, size: 24, damage: 20, color: '#666', dropChance: 0.4 },
-      { type: 'shooter_runner', hp: 25, speed: 4.5, size: 18, damage: 10, color: '#4a4', shootCooldown: 300, fleeDistance: 100, shootRange: 300, dropChance: 0.95 },
+      { type: 'shooter_runner', hp: 25, speed: 2.5, size: 18, damage: 10, color: '#4a4', shootCooldown: 300, fleeDistance: 100, shootRange: 300, dropChance: 0.95 },
     ],
     MIN_COUNT: 10,
     MAX_COUNT: 15,

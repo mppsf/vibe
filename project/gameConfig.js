@@ -33,11 +33,11 @@ const GAME_CONFIG = {
   // Враги
   ENEMIES: {
     TYPES: [
-      { type: 'basic', hp: 40, speed: 1.2, size: 18, damage: 12, color: '#f44', dropChance: 0.25 },
-      { type: 'fast', hp: 30, speed: 2.5, size: 16, damage: 8, color: '#84f', dropChance: 0.2 },
-      { type: 'shooter', hp: 25, speed: 0.8, size: 18, damage: 15, color: '#4a4', shootCooldown: 1500, shootRange: 300, dropChance: 0.3 },
-      { type: 'tank', hp: 80, speed: 0.6, size: 24, damage: 20, color: '#666', dropChance: 0.4 },
-      { type: 'runner', hp: 20, speed: 3, size: 14, damage: 5, color: '#f84', fleeDistance: 100, dropChance: 0.15 }
+      { type: 'basic', hp: 40, speed: 1.2, size: 18, damage: 12, color: '#f44', dropChance: 0.1, spawnChance: 40 },
+      { type: 'fast', hp: 30, speed: 2.5, size: 16, damage: 8, color: '#84f', dropChance: 0.2, spawnChance: 30 },
+      { type: 'shooter', hp: 25, speed: 0.8, size: 18, damage: 15, color: '#4a4', shootCooldown: 1500, shootRange: 300, dropChance: 0.3, spawnChance: 15 },
+      { type: 'tank', hp: 80, speed: 0.6, size: 24, damage: 20, color: '#666', dropChance: 0.4, spawnChance: 10 },
+      { type: 'shooter_runner', hp: 25, speed: 2.5, size: 18, damage: 10, color: '#4a4', shootCooldown: 300, fleeDistance: 100, shootRange: 300, dropChance: 0.95, spawnChance: 5 },
     ],
     MIN_COUNT: 10,
     MAX_COUNT: 15,
