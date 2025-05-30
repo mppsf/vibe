@@ -17,7 +17,7 @@ class NetworkManager {
       if (modal) {
         modal.style.display = 'none';
       }
-      this.game.gameLoop();
+      this.game.startGameLoop();
     });
 
     this.game.socket.on('gameState', data => {

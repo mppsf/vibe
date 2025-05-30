@@ -8,28 +8,60 @@ class InputHandler {
   }
 
   setup() {
-    const keys = ['w','a','s','d',' ','q','tab'];
+    // Убираем фокус с элементов при загрузке
+    document.addEventListener('DOMContentLoaded', () => {
+      document.activeElement?.blur();
+    });
     
-    document.addEventListener('keydown', e => {
+    // Сразу убираем фокус
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      // Игнорируем если фокус на input
+      if (e.target.tagName === 'INPUT') return;
+      
       const key = e.key.toLowerCase();
+      console.log('Нажата клавиша:', key); // Отладка
+      
       this.game.state.keys[key] = true;
       
+      // Обработка Tab
       if (key === 'tab') {
         e.preventDefault();
         this.togglePlayerList();
+        return;
       }
       
-      if (keys.includes(key)) e.preventDefault();
+      // Предотвращаем стандартное поведение для игровых клавиш
+      const gameKeys = ['w','a','s','d',' ','q'];
+      if (gameKeys.includes(key)) {
+        e.preventDefault();
+      }
     });
     
-    document.addEventListener('keyup', e => {
-      this.game.state.keys[e.key.toLowerCase()] = false;
+    document.addEventListener('keyup', (e) => {
+      if (e.target.tagName === 'INPUT') return;
+      
+      const key = e.key.toLowerCase();
+      this.game.state.keys[key] = false;
     });
 
+    // Обработка кликов мыши
     this.game.canvas.addEventListener('click', (e) => {
+      // Убираем фокус с любых элементов при клике на канвас
+      if (document.activeElement) {
+        document.activeElement.blur();
+      }
+      
       if (this.game.state.keys['q']) return;
       this.handleMouseRangedAttack(e);
     });
+    
+    // Убеждаемся что канвас может получать фокус
+    this.game.canvas.setAttribute('tabindex', '0');
+    this.game.canvas.focus();
     
     const joinBtn = document.getElementById('joinBtn');
     const nameInput = document.getElementById('playerNameInput');
@@ -81,16 +113,20 @@ class InputHandler {
   handleAttacks() {
     const now = Date.now();
     
-    if (this.game.state.keys[GAME_CONFIG.CONTROLS.MELEE_ATTACK]) {
+    // Ближняя атака (пробел)
+    if (this.game.state.keys[' ']) {
       if (now - this.lastMeleeTime > GAME_CONFIG.MELEE_ATTACK.COOLDOWN) {
+        console.log('Ближняя атака!'); // Отладка
         this.game.socket.emit('meleeAttack');
         this.game.startMeleeAttack();
         this.lastMeleeTime = now;
       }
     }
     
-    if (this.game.state.keys[GAME_CONFIG.CONTROLS.RANGED_ATTACK]) {
+    // Дальняя атака (Q)
+    if (this.game.state.keys['q']) {
       if (now - this.lastRangedTime > GAME_CONFIG.RANGED_ATTACK.COOLDOWN) {
+        console.log('Дальняя атака!'); // Отладка
         this.performRangedAttack();
         this.lastRangedTime = now;
       }
@@ -146,7 +182,9 @@ class InputHandler {
   togglePlayerList() {
     const playerList = document.getElementById('onlinePlayersList');
     if (playerList) {
-      playerList.style.display = playerList.style.display === 'none' ? 'block' : 'none';
+      const isVisible = playerList.style.display !== 'none';
+      playerList.style.display = isVisible ? 'none' : 'block';
+      console.log('Список игроков:', !isVisible ? 'показан' : 'скрыт'); // Отладка
     }
   }
 }

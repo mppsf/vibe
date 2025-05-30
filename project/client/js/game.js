@@ -76,6 +76,11 @@ class Game {
     this.modules.input.setup();
     this.modules.network.setup();
     this.modules.ui.showNameModal();
+    startGameLoop() 
+    console.log('Запуск игрового цикла');
+    this.gameLoop();
+  
+
     window.addEventListener('resize', () => this.resize());
   }
 
