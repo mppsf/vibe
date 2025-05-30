@@ -25,8 +25,8 @@ class Game {
     this.minimapCtx = this.minimap.getContext('2d');
     
     this.playerId = null;
-    this.WORLD_SIZE = 4000;
-    this.MAP_SCALE = 230 / this.WORLD_SIZE;
+    this.WORLD_SIZE = GAME_CONFIG.WORLD_SIZE;
+    this.MAP_SCALE = GAME_CONFIG.MAP_SCALE;
     
     this.state = {
       camera: {x: 0, y: 0},
@@ -38,10 +38,17 @@ class Game {
       droppedCoins: [],
       keys: {},
       attackEffect: null,
-      attackCooldown: {
-        active: false,
-        startTime: 0,
-        duration: 500
+      cooldowns: {
+        melee: {
+          active: false,
+          startTime: 0,
+          duration: GAME_CONFIG.MELEE_ATTACK.COOLDOWN
+        },
+        ranged: {
+          active: false,
+          startTime: 0,
+          duration: GAME_CONFIG.RANGED_ATTACK.COOLDOWN
+        }
       },
       stats: {
         kills: 0,
@@ -77,15 +84,22 @@ class Game {
     this.canvas.height = window.innerHeight;
   }
 
-  canAttack() {
-    return !this.state.attackCooldown.active;
+  canAttack(type = 'melee') {
+    return !this.state.cooldowns[type].active;
   }
 
-  startAttack() {
-    if (!this.canAttack() || !this.state.myPlayer) return false;
+  startMeleeAttack() {
+    if (!this.canAttack('melee') || !this.state.myPlayer) return false;
     
     this.startAttackEffect();
-    this.startAttackCooldown();
+    this.startCooldown('melee');
+    return true;
+  }
+
+  startRangedAttack() {
+    if (!this.canAttack('ranged') || !this.state.myPlayer) return false;
+    
+    this.startCooldown('ranged');
     return true;
   }
 
@@ -93,16 +107,16 @@ class Game {
     if (!this.state.myPlayer) return;
     this.state.attackEffect = {
       radius: 0,
-      maxRadius: 60,
-      duration: 300,
+      maxRadius: GAME_CONFIG.MELEE_ATTACK.RANGE,
+      duration: GAME_CONFIG.MELEE_ATTACK.EFFECT_DURATION,
       startTime: Date.now()
     };
   }
 
-  startAttackCooldown() {
-    this.state.attackCooldown.active = true;
-    this.state.attackCooldown.startTime = Date.now();
-    document.getElementById('attackCooldown').style.display = 'block';
+  startCooldown(type) {
+    this.state.cooldowns[type].active = true;
+    this.state.cooldowns[type].startTime = Date.now();
+    document.getElementById(`${type}Cooldown`).style.display = 'block';
   }
 
   updateAttackEffect() {
@@ -119,22 +133,24 @@ class Game {
     this.state.attackEffect.radius = this.state.attackEffect.maxRadius * progress;
   }
 
-  updateAttackCooldown() {
-    if (!this.state.attackCooldown.active) return;
-    
-    const elapsed = Date.now() - this.state.attackCooldown.startTime;
-    const progress = elapsed / this.state.attackCooldown.duration;
-    
-    if (progress >= 1) {
-      this.state.attackCooldown.active = false;
-      document.getElementById('attackCooldown').style.display = 'none';
-      return;
-    }
-    
-    const progressBar = document.querySelector('.cooldown-progress');
-    if (progressBar) {
-      progressBar.style.width = `${(1 - progress) * 100}%`;
-    }
+  updateCooldowns() {
+    ['melee', 'ranged'].forEach(type => {
+      if (!this.state.cooldowns[type].active) return;
+      
+      const elapsed = Date.now() - this.state.cooldowns[type].startTime;
+      const progress = elapsed / this.state.cooldowns[type].duration;
+      
+      if (progress >= 1) {
+        this.state.cooldowns[type].active = false;
+        document.getElementById(`${type}Cooldown`).style.display = 'none';
+        return;
+      }
+      
+      const progressBar = document.querySelector(`#${type}Cooldown .cooldown-progress`);
+      if (progressBar) {
+        progressBar.style.width = `${(1 - progress) * 100}%`;
+      }
+    });
   }
 
   addKill(type = 'player') {
@@ -164,7 +180,7 @@ class Game {
     this.modules.input.update();
     this.updateCamera();
     this.updateAttackEffect();
-    this.updateAttackCooldown();
+    this.updateCooldowns();
     this.modules.renderer.draw();
     requestAnimationFrame(() => this.gameLoop());
   }

@@ -30,17 +30,17 @@ body {
   left: 20px; 
   z-index: 10; 
   background: rgba(25, 25, 25, 0.95);
-  padding: 22px 26px;
+  padding: 18px 21px;
   border: 1px solid #4CAF50;
   border-radius: 12px;
-  font-size: 19px;
+  font-size: 15px;
   font-weight: 600;
-  min-width: 216px;
+  min-width: 173px;
   backdrop-filter: blur(5px);
 }
 
 #ui div {
-  margin: 6px 0;
+  margin: 5px 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -52,8 +52,8 @@ body {
 }
 
 #playerName {
-  margin-top: 10px; 
-  font-size: 14px; 
+  margin-top: 8px; 
+  font-size: 12px; 
   opacity: 0.9;
   color: #81C784;
 }
@@ -62,8 +62,8 @@ body {
   position: absolute; 
   top: 20px; 
   right: 20px; 
-  width: 240px; 
-  height: 240px; 
+  width: 192px; 
+  height: 192px; 
   background: rgba(25, 25, 25, 0.95);
   border: 1px solid #2196F3;
   border-radius: 12px;
@@ -76,31 +76,31 @@ body {
   left: 50%; 
   transform: translateX(-50%);
   background: rgba(25, 25, 25, 0.95);
-  padding: 22px 26px;
+  padding: 18px 21px;
   border: 1px solid #FF9800;
   border-radius: 12px;
-  max-width: 576px;
-  font-size: 18px;
+  max-width: 460px;
+  font-size: 14px;
   backdrop-filter: blur(5px);
-  min-width: 384px;
+  min-width: 307px;
 }
 
 .players-header {
   text-align: center;
   color: #FF9800;
   font-weight: bold;
-  margin-bottom: 12px;
-  font-size: 16px;
+  margin-bottom: 10px;
+  font-size: 14px;
 }
 
 .player-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 8px 0;
-  padding: 8px 12px;
+  margin: 6px 0;
+  padding: 6px 10px;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  border-radius: 6px;
   border-left: 2px solid #4CAF50;
   transition: background 0.2s ease;
 }
@@ -123,43 +123,43 @@ body {
   color: #4CAF50;
   font-weight: bold;
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 #controlsGuide { 
   position: absolute; 
   bottom: 20px; 
   left: 20px; 
-  font-size: 17px; 
+  font-size: 14px; 
   background: rgba(25, 25, 25, 0.95);
-  padding: 22px 26px;
+  padding: 18px 21px;
   border-radius: 12px;
   border: 1px solid #9C27B0;
   backdrop-filter: blur(5px);
-  max-width: 360px;
+  max-width: 288px;
 }
 
 .controls-header {
   color: #9C27B0;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .control-item {
   display: flex;
   justify-content: space-between;
-  margin: 6px 0;
-  padding: 4px 0;
+  margin: 5px 0;
+  padding: 3px 0;
 }
 
 .control-key {
   color: #FFB74D;
   font-weight: bold;
   background: rgba(255, 183, 77, 0.15);
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 3px 6px;
+  border-radius: 5px;
   font-family: monospace;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .control-desc {
@@ -171,24 +171,24 @@ body {
   bottom: 20px;
   right: 20px;
   background: rgba(25, 25, 25, 0.95);
-  padding: 22px 26px;
+  padding: 18px 21px;
   border-radius: 12px;
   border: 1px solid #E91E63;
   backdrop-filter: blur(5px);
-  font-size: 17px;
-  min-width: 192px;
+  font-size: 14px;
+  min-width: 154px;
 }
 
 .stats-header {
   color: #E91E63;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .stat-item {
   display: flex;
   justify-content: space-between;
-  margin: 6px 0;
+  margin: 5px 0;
 }
 
 .stat-value {
@@ -196,41 +196,67 @@ body {
   font-weight: bold;
 }
 
-#attackCooldown {
+.attack-cooldowns {
   position: absolute;
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
+  display: flex;
+  gap: 15px;
+}
+
+.cooldown-container {
   background: rgba(25, 25, 25, 0.95);
-  padding: 16px 22px;
-  border-radius: 12px;
-  border: 1px solid #2196F3;
+  padding: 13px 18px;
+  border-radius: 10px;
   backdrop-filter: blur(5px);
-  font-size: 17px;
-  min-width: 144px;
+  font-size: 14px;
+  min-width: 115px;
   text-align: center;
   display: none;
 }
 
+#meleeCooldown {
+  border: 1px solid #2196F3;
+}
+
+#rangedCooldown {
+  border: 1px solid #FF5722;
+}
+
 .cooldown-header {
-  color: #2196F3;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
+}
+
+#meleeCooldown .cooldown-header {
+  color: #2196F3;
+}
+
+#rangedCooldown .cooldown-header {
+  color: #FF5722;
 }
 
 .cooldown-bar {
-  width: 120px;
-  height: 10px;
+  width: 96px;
+  height: 8px;
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 5px;
+  border-radius: 4px;
   overflow: hidden;
 }
 
 .cooldown-progress {
   height: 100%;
-  background: linear-gradient(90deg, #2196F3, #64B5F6);
-  border-radius: 5px;
+  border-radius: 4px;
   transition: width 0.1s ease;
+}
+
+#meleeCooldown .cooldown-progress {
+  background: linear-gradient(90deg, #2196F3, #64B5F6);
+}
+
+#rangedCooldown .cooldown-progress {
+  background: linear-gradient(90deg, #FF5722, #FF8A65);
 }
 
 #nameModal { 
@@ -255,11 +281,11 @@ body {
 
 .modal-content { 
   background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
-  padding: 50px;
+  padding: 40px;
   border: 2px solid #4CAF50;
-  border-radius: 15px;
+  border-radius: 12px;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   transform: scale(0.9);
   animation: modalIn 0.3s ease forwards;
 }
@@ -269,26 +295,26 @@ body {
 }
 
 .modal-content h2 {
-  margin-bottom: 25px;
+  margin-bottom: 20px;
   color: #4CAF50;
-  font-size: 28px;
+  font-size: 22px;
 }
 
 .modal-content p {
-  margin-bottom: 20px; 
+  margin-bottom: 16px; 
   color: #B0BEC5;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 #playerNameInput { 
-  padding: 16px 22px;
-  margin: 20px 0;
-  font-size: 18px;
+  padding: 13px 18px;
+  margin: 16px 0;
+  font-size: 15px;
   background: rgba(64, 64, 64, 0.8);
   color: #e0e0e0;
   border: 1px solid #666;
-  border-radius: 10px;
-  width: 260px;
+  border-radius: 8px;
+  width: 208px;
   font-family: inherit;
   transition: border-color 0.2s ease;
 }
@@ -299,17 +325,17 @@ body {
 }
 
 #joinBtn { 
-  padding: 16px 32px;
-  font-size: 18px;
+  padding: 13px 26px;
+  font-size: 15px;
   background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: pointer;
   font-family: inherit;
   font-weight: bold;
   transition: background 0.2s ease;
-  margin-top: 15px;
+  margin-top: 12px;
 }
 
 #joinBtn:hover {
@@ -321,22 +347,22 @@ body {
 }
 
 @keyframes slideInLeft {
-  from { transform: translateX(-60px); opacity: 0; }
+  from { transform: translateX(-48px); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
 }
 
 @keyframes slideInRight {
-  from { transform: translateX(60px); opacity: 0; }
+  from { transform: translateX(48px); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
 }
 
 @keyframes slideInTop {
-  from { transform: translate(-50%, -60px); opacity: 0; }
+  from { transform: translate(-50%, -48px); opacity: 0; }
   to { transform: translate(-50%, 0); opacity: 1; }
 }
 
 @keyframes slideInBottom {
-  from { transform: translateY(60px); opacity: 0; }
+  from { transform: translateY(48px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
@@ -360,14 +386,14 @@ body {
   animation: slideInBottom 0.4s ease 0.1s both;
 }
 
-#attackCooldown {
+.attack-cooldowns {
   animation: slideInBottom 0.4s ease 0.2s both;
 }
 
-#ui, #minimap, #onlinePlayersList, #controlsGuide, #gameStats, #attackCooldown {
+#ui, #minimap, #onlinePlayersList, #controlsGuide, #gameStats, .attack-cooldowns {
   transition: transform 0.2s ease;
 }
 
-#ui:hover, #minimap:hover, #onlinePlayersList:hover, #controlsGuide:hover, #gameStats:hover, #attackCooldown:hover {
-  transform: translateY(-3px);
+#ui:hover, #minimap:hover, #onlinePlayersList:hover, #controlsGuide:hover, #gameStats:hover, .attack-cooldowns:hover {
+  transform: translateY(-2px);
 }

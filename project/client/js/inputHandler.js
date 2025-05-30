@@ -1,12 +1,12 @@
 class InputHandler {
   constructor(game) {
     this.game = game;
-    this.lastAttackTime = 0;
-    this.attackCooldown = 500;
+    this.lastMeleeTime = 0;
+    this.lastRangedTime = 0;
   }
 
   setup() {
-    const keys = ['w','a','s','d',' ','tab'];
+    const keys = ['w','a','s','d',' ','q','tab'];
     
     document.addEventListener('keydown', e => {
       const key = e.key.toLowerCase();
@@ -44,28 +44,39 @@ class InputHandler {
     if (!this.game.state.myPlayer) return;
     
     this.handleMovement();
-    this.handleAttack();
+    this.handleAttacks();
   }
 
   handleMovement() {
     let dx = 0, dy = 0;
-    if (this.game.state.keys.w) dy = -1;
-    if (this.game.state.keys.s) dy = 1;
-    if (this.game.state.keys.a) dx = -1;
-    if (this.game.state.keys.d) dx = 1;
+    if (this.game.state.keys[GAME_CONFIG.CONTROLS.MOVE_UP]) dy = -1;
+    if (this.game.state.keys[GAME_CONFIG.CONTROLS.MOVE_DOWN]) dy = 1;
+    if (this.game.state.keys[GAME_CONFIG.CONTROLS.MOVE_LEFT]) dx = -1;
+    if (this.game.state.keys[GAME_CONFIG.CONTROLS.MOVE_RIGHT]) dx = 1;
     
     if (dx || dy) {
       this.game.socket.emit('move', { dx, dy });
     }
   }
 
-  handleAttack() {
-    if (this.game.state.keys[' ']) {
-      const now = Date.now();
-      if (now - this.lastAttackTime > this.attackCooldown) {
-        this.game.socket.emit('attack');
-        this.game.startAttackEffect();
-        this.lastAttackTime = now;
+  handleAttacks() {
+    const now = Date.now();
+    
+    // Ближняя атака (пробел)
+    if (this.game.state.keys[GAME_CONFIG.CONTROLS.MELEE_ATTACK]) {
+      if (now - this.lastMeleeTime > GAME_CONFIG.MELEE_ATTACK.COOLDOWN) {
+        this.game.socket.emit('meleeAttack');
+        this.game.startMeleeAttack();
+        this.lastMeleeTime = now;
+      }
+    }
+    
+    // Дальняя атака (Q)
+    if (this.game.state.keys[GAME_CONFIG.CONTROLS.RANGED_ATTACK]) {
+      if (now - this.lastRangedTime > GAME_CONFIG.RANGED_ATTACK.COOLDOWN) {
+        this.game.socket.emit('rangedAttack');
+        this.game.startRangedAttack();
+        this.lastRangedTime = now;
       }
     }
   }
