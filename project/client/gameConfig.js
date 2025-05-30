@@ -1,14 +1,14 @@
 const GAME_CONFIG = {
   // Мир и камера
   WORLD_SIZE: 4000,
-  MAP_SCALE: 184 / 4000, // Уменьшен размер миникарты
+  MAP_SCALE: 184 / 4000,
   
-  // Игрок
-  PLAYER_SIZE: 30,
-  PLAYER_SPEED: 15,
+  // Игрок (синхронизировано с сервером)
+  PLAYER_SIZE: 20, // было 30
+  PLAYER_SPEED: 3, // было 15
   PLAYER_MAX_HP: 100,
   
-  // Атаки
+  // Атаки (синхронизировано с сервером)
   MELEE_ATTACK: {
     COOLDOWN: 500,
     RANGE: 60,
@@ -21,37 +21,38 @@ const GAME_CONFIG = {
     RANGE: 300,
     DAMAGE: 15,
     BULLET_SPEED: 8,
-    BULLET_SIZE: 6
+    BULLET_SIZE: 6,
+    BULLET_LIFE: 120 // добавлено для синхронизации
   },
   
-  // Враги и монеты
-  ENEMY_SIZE: 20,
+  // Враги и монеты (синхронизировано с сервером)
+  ENEMY_SIZE: 18, // средний размер врагов
   COIN_SIZE: 12,
   
-  // Интерфейс (уменьшен на 20%)
+  // Интерфейс
   UI: {
     MAIN_PANEL: {
-      PADDING: 18, // было 22
-      FONT_SIZE: 15, // было 19
-      MIN_WIDTH: 173 // было 216
+      PADDING: 18,
+      FONT_SIZE: 15,
+      MIN_WIDTH: 173
     },
     MINIMAP: {
-      SIZE: 192 // было 240
+      SIZE: 192
     },
     PLAYER_LIST: {
-      PADDING: 18, // было 22
-      FONT_SIZE: 14, // было 18
-      MIN_WIDTH: 307 // было 384
+      PADDING: 18,
+      FONT_SIZE: 14,
+      MIN_WIDTH: 307
     },
     CONTROLS: {
-      PADDING: 18, // было 22
-      FONT_SIZE: 14, // было 17
-      MAX_WIDTH: 288 // было 360
+      PADDING: 18,
+      FONT_SIZE: 14,
+      MAX_WIDTH: 288
     },
     STATS: {
-      PADDING: 18, // было 22
-      FONT_SIZE: 14, // было 17
-      MIN_WIDTH: 154 // было 192
+      PADDING: 18,
+      FONT_SIZE: 14,
+      MIN_WIDTH: 154
     }
   },
   

@@ -54,7 +54,22 @@ class InputHandler {
         return;
       }
       
-      const gameKeys = ['w','a','s','d',' ','q'];
+      // Обработка атак сразу при нажатии
+      if (key === ' ') {
+        e.preventDefault();
+        this.handleMeleeAttack();
+        removeFocus();
+        return;
+      }
+      
+      if (key === 'q') {
+        e.preventDefault();
+        this.handleRangedAttack();
+        removeFocus();
+        return;
+      }
+      
+      const gameKeys = ['w','a','s','d'];
       if (gameKeys.includes(key)) {
         e.preventDefault();
         removeFocus();
@@ -229,9 +244,7 @@ class InputHandler {
     if (!this.game.state.myPlayer) return;
     
     this.handleMovement();
-    if (!this.isMobile) {
-      this.handleAttacks();
-    }
+    // Убираем обработку атак из update, т.к. теперь обрабатываем в keydown
   }
 
   handleMovement() {
@@ -251,25 +264,10 @@ class InputHandler {
     }
   }
 
-  handleAttacks() {
-    const now = Date.now();
-    
-    if (this.game.state.keys[' ']) {
-      if (now - this.lastMeleeTime > GAME_CONFIG.MELEE_ATTACK.COOLDOWN) {
-        this.handleMeleeAttack();
-      }
-    }
-    
-    if (this.game.state.keys['q']) {
-      if (now - this.lastRangedTime > GAME_CONFIG.RANGED_ATTACK.COOLDOWN) {
-        this.handleRangedAttack();
-      }
-    }
-  }
-
   handleMeleeAttack() {
     const now = Date.now();
     if (now - this.lastMeleeTime < GAME_CONFIG.MELEE_ATTACK.COOLDOWN) return;
+    if (!this.game.state.myPlayer) return;
     
     this.game.socket.emit('meleeAttack');
     this.game.startMeleeAttack();
@@ -292,13 +290,11 @@ class InputHandler {
     
     let vx = 0, vy = 0;
 
-    // Если есть движение, стреляем в направлении движения
     if (movement.dx !== 0 || movement.dy !== 0) {
       const length = Math.sqrt(movement.dx * movement.dx + movement.dy * movement.dy);
       vx = movement.dx / length;
       vy = movement.dy / length;
     } else {
-      // Если не двигаемся, стреляем вправо по умолчанию
       vx = 1;
       vy = 0;
     }
