@@ -42,7 +42,7 @@ class EnemyManager {
   }
 
   getMeleeRange(enemy) {
-    return Math.max(enemy.size + 15, 25);
+    return (enemy.size + GAME_CONFIG.PLAYER.SIZE) / 2 + 5;
   }
 
   update(players, bulletManager, coinManager) {
