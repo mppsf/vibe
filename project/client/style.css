@@ -397,3 +397,335 @@ body {
 #ui:hover, #minimap:hover, #onlinePlayersList:hover, #controlsGuide:hover, #gameStats:hover, .attack-cooldowns:hover {
   transform: translateY(-2px);
 }
+/* Мобильное управление */
+#mobileControls {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+  display: none;
+}
+
+#joystickArea {
+  position: absolute;
+  bottom: 30px;
+  left: 30px;
+  width: 140px;
+  height: 140px;
+  pointer-events: all;
+}
+
+#joystickOuter {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+  backdrop-filter: blur(5px);
+}
+
+#joystickInner {
+  position: absolute;
+  width: 35px;
+  height: 35px;
+  background: rgba(76, 175, 80, 0.8);
+  border: 2px solid #4CAF50;
+  border-radius: 50%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s ease;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.4);
+}
+
+#mobileButtons {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  pointer-events: all;
+}
+
+.mobile-btn {
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  border: 2px solid;
+  font-size: 24px;
+  color: white;
+  background: rgba(25, 25, 25, 0.9);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(5px);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.melee-btn {
+  border-color: #2196F3;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.ranged-btn {
+  border-color: #FF5722;
+  box-shadow: 0 4px 12px rgba(255, 87, 34, 0.3);
+}
+
+.mobile-btn:active {
+  transform: scale(0.95);
+}
+
+.melee-btn:active {
+  background: rgba(33, 150, 243, 0.3);
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.5);
+}
+
+.ranged-btn:active {
+  background: rgba(255, 87, 34, 0.3);
+  box-shadow: 0 2px 8px rgba(255, 87, 34, 0.5);
+}
+
+/* Адаптивные стили */
+@media (max-width: 768px) {
+  #mobileControls {
+    display: block;
+  }
+  
+  /* Скрываем список игроков по умолчанию на мобильных */
+  #onlinePlayersList {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 90vw;
+    max-height: 70vh;
+    overflow-y: auto;
+    z-index: 200;
+  }
+  
+  /* Уменьшаем интерфейс */
+  #ui {
+    top: 10px;
+    left: 10px;
+    padding: 12px 15px;
+    font-size: 13px;
+    min-width: 140px;
+  }
+  
+  #minimap {
+    top: 10px;
+    right: 10px;
+    width: 120px;
+    height: 120px;
+  }
+  
+  #controlsGuide {
+    display: none;
+  }
+  
+  #gameStats {
+    bottom: 10px;
+    right: 10px;
+    padding: 12px 15px;
+    font-size: 12px;
+    min-width: 120px;
+  }
+  
+  .attack-cooldowns {
+    bottom: 200px;
+    transform: translateX(-50%);
+  }
+  
+  .cooldown-container {
+    padding: 8px 12px;
+    font-size: 12px;
+    min-width: 85px;
+  }
+  
+  .cooldown-bar {
+    width: 70px;
+    height: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  #ui {
+    font-size: 12px;
+    padding: 10px 12px;
+    min-width: 120px;
+  }
+  
+  #minimap {
+    width: 100px;
+    height: 100px;
+  }
+  
+  #gameStats {
+    font-size: 11px;
+    padding: 10px 12px;
+    min-width: 100px;
+  }
+  
+  #joystickArea {
+    bottom: 20px;
+    left: 20px;
+    width: 120px;
+    height: 120px;
+  }
+  
+  #joystickOuter {
+    width: 70px;
+    height: 70px;
+  }
+  
+  #joystickInner {
+    width: 30px;
+    height: 30px;
+  }
+  
+  #mobileButtons {
+    bottom: 20px;
+    right: 20px;
+    gap: 12px;
+  }
+  
+  .mobile-btn {
+    width: 55px;
+    height: 55px;
+    font-size: 20px;
+  }
+  
+  .attack-cooldowns {
+    bottom: 160px;
+    gap: 10px;
+  }
+  
+  .cooldown-container {
+    padding: 6px 10px;
+    font-size: 11px;
+    min-width: 75px;
+  }
+  
+  .cooldown-bar {
+    width: 60px;
+    height: 5px;
+  }
+}
+
+/* Ландшафтная ориентация на мобильных */
+@media (max-height: 500px) and (orientation: landscape) {
+  #ui, #minimap, #gameStats {
+    top: 5px;
+    font-size: 11px;
+  }
+  
+  #ui {
+    left: 5px;
+    padding: 8px 10px;
+  }
+  
+  #minimap {
+    right: 5px;
+    width: 80px;
+    height: 80px;
+  }
+  
+  #gameStats {
+    right: 5px;
+    bottom: 5px;
+    padding: 8px 10px;
+  }
+  
+  #joystickArea {
+    bottom: 15px;
+    left: 15px;
+    width: 100px;
+    height: 100px;
+  }
+  
+  #mobileButtons {
+    bottom: 15px;
+    right: 15px;
+  }
+  
+  .mobile-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 18px;
+  }
+  
+  .attack-cooldowns {
+    bottom: 80px;
+  }
+}
+
+/* Планшеты */
+@media (min-width: 769px) and (max-width: 1024px) {
+  #onlinePlayersList {
+    min-width: 280px;
+    font-size: 13px;
+  }
+  
+  #controlsGuide {
+    max-width: 260px;
+    font-size: 13px;
+  }
+}
+
+/* Темная тема для мобильных элементов */
+@media (prefers-color-scheme: dark) {
+  #joystickOuter {
+    background: rgba(40, 40, 40, 0.9);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+  
+  .mobile-btn {
+    background: rgba(40, 40, 40, 0.95);
+  }
+}
+
+/* Анимации для мобильных элементов */
+@keyframes joystickFadeIn {
+  from { 
+    opacity: 0; 
+    transform: translate(-50%, -50%) scale(0.8); 
+  }
+  to { 
+    opacity: 0.6; 
+    transform: translate(-50%, -50%) scale(1); 
+  }
+}
+
+@keyframes buttonsFadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateX(50px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
+}
+
+#joystickOuter {
+  animation: joystickFadeIn 0.3s ease;
+}
+
+#mobileButtons {
+  animation: buttonsFadeIn 0.4s ease 0.1s both;
+}

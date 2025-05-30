@@ -5,64 +5,217 @@ class InputHandler {
     this.lastRangedTime = 0;
     this.lastMoveTime = 0;
     this.moveThrottle = 50;
+    
+    // Мобильное управление
+    this.isMobile = this.detectMobile();
+    this.touchJoystick = null;
+    this.touchStartPos = null;
+    this.currentTouch = null;
+    this.joystickDeadZone = 20;
+    this.joystickMaxDistance = 60;
+  }
+
+  detectMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+           window.innerWidth <= 768 || 'ontouchstart' in window;
   }
 
   setup() {
-    // Убираем фокус с элементов при загрузке
-    document.addEventListener('DOMContentLoaded', () => {
-      document.activeElement?.blur();
-    });
-    
-    // Сразу убираем фокус
-    if (document.activeElement) {
-      document.activeElement.blur();
+    this.setupKeyboard();
+    if (this.isMobile) {
+      this.setupMobile();
     }
+    this.setupMouse();
+    this.setupButtons();
+  }
+
+  setupKeyboard() {
+    // Принудительное снятие фокуса
+    const removeFocus = () => {
+      if (document.activeElement && document.activeElement !== document.body) {
+        document.activeElement.blur();
+      }
+      document.body.focus();
+    };
+
+    document.addEventListener('DOMContentLoaded', removeFocus);
+    removeFocus();
+
+    // Делаем body фокусируемым
+    document.body.setAttribute('tabindex', '0');
+    document.body.focus();
 
     document.addEventListener('keydown', (e) => {
-      // Игнорируем если фокус на input
-      if (e.target.tagName === 'INPUT') return;
+      // Игнорируем только если это поле ввода имени
+      if (e.target.id === 'playerNameInput') return;
       
       const key = e.key.toLowerCase();
-      console.log('Нажата клавиша:', key); // Отладка
-      
       this.game.state.keys[key] = true;
       
-      // Обработка Tab
       if (key === 'tab') {
         e.preventDefault();
         this.togglePlayerList();
         return;
       }
       
-      // Предотвращаем стандартное поведение для игровых клавиш
       const gameKeys = ['w','a','s','d',' ','q'];
       if (gameKeys.includes(key)) {
         e.preventDefault();
+        removeFocus();
       }
     });
     
     document.addEventListener('keyup', (e) => {
-      if (e.target.tagName === 'INPUT') return;
+      if (e.target.id === 'playerNameInput') return;
       
       const key = e.key.toLowerCase();
       this.game.state.keys[key] = false;
     });
 
-    // Обработка кликов мыши
-    this.game.canvas.addEventListener('click', (e) => {
-      // Убираем фокус с любых элементов при клике на канвас
-      if (document.activeElement) {
-        document.activeElement.blur();
+    // Убираем фокус при клике на игровую область
+    document.addEventListener('click', (e) => {
+      if (e.target.id !== 'playerNameInput') {
+        removeFocus();
       }
+    });
+  }
+
+  setupMobile() {
+    this.createMobileControls();
+    this.setupTouchJoystick();
+    this.setupMobileButtons();
+  }
+
+  createMobileControls() {
+    const mobileControls = document.createElement('div');
+    mobileControls.id = 'mobileControls';
+    mobileControls.innerHTML = `
+      <div id="joystickArea">
+        <div id="joystickOuter">
+          <div id="joystickInner"></div>
+        </div>
+      </div>
+      <div id="mobileButtons">
+        <button id="meleeBtn" class="mobile-btn melee-btn">⚔️</button>
+        <button id="rangedBtn" class="mobile-btn ranged-btn">🏹</button>
+      </div>
+    `;
+    document.body.appendChild(mobileControls);
+  }
+
+  setupTouchJoystick() {
+    const joystickArea = document.getElementById('joystickArea');
+    const joystickOuter = document.getElementById('joystickOuter');
+    const joystickInner = document.getElementById('joystickInner');
+    
+    if (!joystickArea || !joystickOuter || !joystickInner) return;
+
+    const handleTouchStart = (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      this.currentTouch = touch.identifier;
       
+      const rect = joystickArea.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      
+      joystickOuter.style.left = (touch.clientX - centerX) + 'px';
+      joystickOuter.style.top = (touch.clientY - centerY) + 'px';
+      joystickOuter.style.opacity = '1';
+      
+      this.touchStartPos = { x: touch.clientX, y: touch.clientY };
+    };
+
+    const handleTouchMove = (e) => {
+      e.preventDefault();
+      if (!this.currentTouch || !this.touchStartPos) return;
+      
+      const touch = Array.from(e.touches).find(t => t.identifier === this.currentTouch);
+      if (!touch) return;
+
+      const deltaX = touch.clientX - this.touchStartPos.x;
+      const deltaY = touch.clientY - this.touchStartPos.y;
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+      
+      if (distance > this.joystickDeadZone) {
+        const clampedDistance = Math.min(distance, this.joystickMaxDistance);
+        const angle = Math.atan2(deltaY, deltaX);
+        
+        const x = Math.cos(angle) * clampedDistance;
+        const y = Math.sin(angle) * clampedDistance;
+        
+        joystickInner.style.transform = `translate(${x}px, ${y}px)`;
+        
+        // Преобразуем в движение
+        const moveX = x / this.joystickMaxDistance;
+        const moveY = y / this.joystickMaxDistance;
+        
+        this.game.state.keys.w = moveY < -0.3;
+        this.game.state.keys.s = moveY > 0.3;
+        this.game.state.keys.a = moveX < -0.3;
+        this.game.state.keys.d = moveX > 0.3;
+      } else {
+        this.resetMovementKeys();
+      }
+    };
+
+    const handleTouchEnd = (e) => {
+      e.preventDefault();
+      if (!this.currentTouch) return;
+      
+      const touch = Array.from(e.changedTouches).find(t => t.identifier === this.currentTouch);
+      if (!touch) return;
+
+      joystickOuter.style.opacity = '0.6';
+      joystickInner.style.transform = 'translate(0px, 0px)';
+      
+      this.resetMovementKeys();
+      this.currentTouch = null;
+      this.touchStartPos = null;
+    };
+
+    joystickArea.addEventListener('touchstart', handleTouchStart, { passive: false });
+    joystickArea.addEventListener('touchmove', handleTouchMove, { passive: false });
+    joystickArea.addEventListener('touchend', handleTouchEnd, { passive: false });
+    joystickArea.addEventListener('touchcancel', handleTouchEnd, { passive: false });
+  }
+
+  setupMobileButtons() {
+    const meleeBtn = document.getElementById('meleeBtn');
+    const rangedBtn = document.getElementById('rangedBtn');
+    
+    if (meleeBtn) {
+      meleeBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        this.handleMeleeAttack();
+      });
+    }
+    
+    if (rangedBtn) {
+      rangedBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        this.handleRangedAttack();
+      });
+    }
+  }
+
+  resetMovementKeys() {
+    this.game.state.keys.w = false;
+    this.game.state.keys.s = false;
+    this.game.state.keys.a = false;
+    this.game.state.keys.d = false;
+  }
+
+  setupMouse() {
+    this.game.canvas.addEventListener('click', (e) => {
       if (this.game.state.keys['q']) return;
       this.handleMouseRangedAttack(e);
     });
     
-    // Убеждаемся что канвас может получать фокус
     this.game.canvas.setAttribute('tabindex', '0');
-    this.game.canvas.focus();
-    
+  }
+
+  setupButtons() {
     const joinBtn = document.getElementById('joinBtn');
     const nameInput = document.getElementById('playerNameInput');
     
@@ -83,7 +236,9 @@ class InputHandler {
     if (!this.game.state.myPlayer) return;
     
     this.handleMovement();
-    this.handleAttacks();
+    if (!this.isMobile) {
+      this.handleAttacks();
+    }
   }
 
   handleMovement() {
@@ -113,24 +268,34 @@ class InputHandler {
   handleAttacks() {
     const now = Date.now();
     
-    // Ближняя атака (пробел)
     if (this.game.state.keys[' ']) {
       if (now - this.lastMeleeTime > GAME_CONFIG.MELEE_ATTACK.COOLDOWN) {
-        console.log('Ближняя атака!'); // Отладка
-        this.game.socket.emit('meleeAttack');
-        this.game.startMeleeAttack();
-        this.lastMeleeTime = now;
+        this.handleMeleeAttack();
       }
     }
     
-    // Дальняя атака (Q)
     if (this.game.state.keys['q']) {
       if (now - this.lastRangedTime > GAME_CONFIG.RANGED_ATTACK.COOLDOWN) {
-        console.log('Дальняя атака!'); // Отладка
-        this.performRangedAttack();
-        this.lastRangedTime = now;
+        this.handleRangedAttack();
       }
     }
+  }
+
+  handleMeleeAttack() {
+    const now = Date.now();
+    if (now - this.lastMeleeTime < GAME_CONFIG.MELEE_ATTACK.COOLDOWN) return;
+    
+    this.game.socket.emit('meleeAttack');
+    this.game.startMeleeAttack();
+    this.lastMeleeTime = now;
+  }
+
+  handleRangedAttack() {
+    const now = Date.now();
+    if (now - this.lastRangedTime < GAME_CONFIG.RANGED_ATTACK.COOLDOWN) return;
+    
+    this.performRangedAttack();
+    this.lastRangedTime = now;
   }
 
   performRangedAttack() {
@@ -184,7 +349,6 @@ class InputHandler {
     if (playerList) {
       const isVisible = playerList.style.display !== 'none';
       playerList.style.display = isVisible ? 'none' : 'block';
-      console.log('Список игроков:', !isVisible ? 'показан' : 'скрыт'); // Отладка
     }
   }
 }
