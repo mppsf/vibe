@@ -59,6 +59,21 @@ class NetworkManager {
   handleGameState(data) {
     if (data.players && Array.isArray(data.players)) {
       this.game.state.players = new Map(data.players.map(p => [p.id, p]));
+      
+      // Обновляем позицию нашего игрока из сервера для точной синхронизации
+      const serverMyPlayer = this.game.state.players.get(this.game.playerId);
+      if (serverMyPlayer && this.game.state.myPlayer) {
+        // Плавная интерполяция для уменьшения рывков
+        const lerpFactor = 0.8;
+        this.game.state.myPlayer.x = this.game.state.myPlayer.x * (1 - lerpFactor) + serverMyPlayer.x * lerpFactor;
+        this.game.state.myPlayer.y = this.game.state.myPlayer.y * (1 - lerpFactor) + serverMyPlayer.y * lerpFactor;
+        this.game.state.myPlayer.hp = serverMyPlayer.hp;
+        this.game.state.myPlayer.maxHp = serverMyPlayer.maxHp;
+        this.game.state.myPlayer.coins = serverMyPlayer.coins;
+        this.game.state.myPlayer.name = serverMyPlayer.name;
+      } else if (serverMyPlayer) {
+        this.game.state.myPlayer = serverMyPlayer;
+      }
     }
     
     this.game.state.coins = data.coins || [];
@@ -66,12 +81,7 @@ class NetworkManager {
     this.game.state.bullets = data.bullets || [];
     this.game.state.droppedCoins = data.droppedCoins || [];
     
-    const myPlayer = this.game.state.players.get(this.game.playerId);
-    if (myPlayer) {
-      this.game.state.myPlayer = myPlayer;
-      this.game.modules.ui.updatePlayerStats();
-    }
-    
+    this.game.modules.ui.updatePlayerStats();
     this.game.modules.ui.updatePlayerList();
   }
 }

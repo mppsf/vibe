@@ -4,9 +4,8 @@ class InputHandler {
     this.lastMeleeTime = 0;
     this.lastRangedTime = 0;
     this.lastMoveTime = 0;
-    this.moveThrottle = 50;
+    this.moveThrottle = 16; // Уменьшили для более плавного движения
     
-    // Мобильное управление
     this.isMobile = this.detectMobile();
     this.touchJoystick = null;
     this.touchStartPos = null;
@@ -30,7 +29,6 @@ class InputHandler {
   }
 
   setupKeyboard() {
-    // Принудительное снятие фокуса
     const removeFocus = () => {
       if (document.activeElement && document.activeElement !== document.body) {
         document.activeElement.blur();
@@ -41,12 +39,10 @@ class InputHandler {
     document.addEventListener('DOMContentLoaded', removeFocus);
     removeFocus();
 
-    // Делаем body фокусируемым
     document.body.setAttribute('tabindex', '0');
     document.body.focus();
 
     document.addEventListener('keydown', (e) => {
-      // Игнорируем только если это поле ввода имени
       if (e.target.id === 'playerNameInput') return;
       
       const key = e.key.toLowerCase();
@@ -72,7 +68,6 @@ class InputHandler {
       this.game.state.keys[key] = false;
     });
 
-    // Убираем фокус при клике на игровую область
     document.addEventListener('click', (e) => {
       if (e.target.id !== 'playerNameInput') {
         removeFocus();
@@ -146,7 +141,6 @@ class InputHandler {
         
         joystickInner.style.transform = `translate(${x}px, ${y}px)`;
         
-        // Преобразуем в движение
         const moveX = x / this.joystickMaxDistance;
         const moveY = y / this.joystickMaxDistance;
         
@@ -249,15 +243,19 @@ class InputHandler {
     
     if (movement.dx || movement.dy) {
       const player = this.game.state.myPlayer;
-      const newPos = GameUtils.clampToWorld(
-        player.x + movement.dx * GAME_CONFIG.PLAYER_SPEED,
-        player.y + movement.dy * GAME_CONFIG.PLAYER_SPEED,
-        this.game.WORLD_SIZE
-      );
+      
+      // Предсказываем новую позицию локально для плавности
+      const newX = player.x + movement.dx * GAME_CONFIG.PLAYER_SPEED;
+      const newY = player.y + movement.dy * GAME_CONFIG.PLAYER_SPEED;
+      const clampedPos = GameUtils.clampToWorld(newX, newY, this.game.WORLD_SIZE);
+      
+      // Временно обновляем позицию игрока для камеры
+      this.game.state.myPlayer.x = clampedPos.x;
+      this.game.state.myPlayer.y = clampedPos.y;
       
       this.game.socket.emit('move', { 
-        x: newPos.x, 
-        y: newPos.y, 
+        x: clampedPos.x, 
+        y: clampedPos.y, 
         direction: movement.direction 
       });
       
