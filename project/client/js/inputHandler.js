@@ -4,7 +4,7 @@ class InputHandler {
     this.lastMeleeTime = 0;
     this.lastRangedTime = 0;
     this.lastMoveTime = 0;
-    this.moveThrottle = 16; // Уменьшили для более плавного движения
+    this.moveThrottle = 16;
     
     this.isMobile = this.detectMobile();
     this.touchJoystick = null;
@@ -242,20 +242,10 @@ class InputHandler {
     const movement = GameUtils.getMovementDirection(this.game.state.keys, GAME_CONFIG.CONTROLS);
     
     if (movement.dx || movement.dy) {
-      const player = this.game.state.myPlayer;
-      
-      // Предсказываем новую позицию локально для плавности
-      const newX = player.x + movement.dx * GAME_CONFIG.PLAYER_SPEED;
-      const newY = player.y + movement.dy * GAME_CONFIG.PLAYER_SPEED;
-      const clampedPos = GameUtils.clampToWorld(newX, newY, this.game.WORLD_SIZE);
-      
-      // Временно обновляем позицию игрока для камеры
-      this.game.state.myPlayer.x = clampedPos.x;
-      this.game.state.myPlayer.y = clampedPos.y;
-      
+      // Отправляем dx, dy вместо абсолютных координат
       this.game.socket.emit('move', { 
-        x: clampedPos.x, 
-        y: clampedPos.y, 
+        dx: movement.dx, 
+        dy: movement.dy,
         direction: movement.direction 
       });
       
@@ -317,7 +307,14 @@ class InputHandler {
       targetY += (centerOffset.y - player.y) * 0.3;
     }
 
-    this.game.socket.emit('rangedAttack', { targetX, targetY });
+    // Вычисляем направление для пули
+    const dx = targetX - player.x;
+    const dy = targetY - player.y;
+    const length = Math.sqrt(dx * dx + dy * dy);
+    const vx = length > 0 ? dx / length : 0;
+    const vy = length > 0 ? dy / length : 0;
+
+    this.game.socket.emit('rangedAttack', { vx, vy });
     this.game.startRangedAttack();
   }
 
@@ -333,11 +330,14 @@ class InputHandler {
       this.game.state.camera
     );
 
-    this.game.socket.emit('rangedAttack', { 
-      targetX: mousePos.x, 
-      targetY: mousePos.y 
-    });
-    
+    const player = this.game.state.myPlayer;
+    const dx = mousePos.x - player.x;
+    const dy = mousePos.y - player.y;
+    const length = Math.sqrt(dx * dx + dy * dy);
+    const vx = length > 0 ? dx / length : 0;
+    const vy = length > 0 ? dy / length : 0;
+
+    this.game.socket.emit('rangedAttack', { vx, vy });
     this.game.startRangedAttack();
     this.lastRangedTime = now;
   }
