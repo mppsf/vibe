@@ -32,7 +32,11 @@
     </div>
     <div class="control-item">
       <span class="control-key">SPACE</span>
-      <span class="control-desc">Атака</span>
+      <span class="control-desc">Ближняя атака</span>
+    </div>
+    <div class="control-item">
+      <span class="control-key">Q</span>
+      <span class="control-desc">Дальняя атака</span>
     </div>
     <div class="control-item">
       <span class="control-key">TAB</span>
@@ -56,10 +60,19 @@
     </div>
   </div>
 
-  <div id="attackCooldown">
-    <div class="cooldown-header">⚡ Атака</div>
-    <div class="cooldown-bar">
-      <div class="cooldown-progress"></div>
+  <div class="attack-cooldowns">
+    <div id="meleeCooldown" class="cooldown-container">
+      <div class="cooldown-header">⚔️ Ближняя</div>
+      <div class="cooldown-bar">
+        <div class="cooldown-progress"></div>
+      </div>
+    </div>
+    
+    <div id="rangedCooldown" class="cooldown-container">
+      <div class="cooldown-header">🏹 Дальняя</div>
+      <div class="cooldown-bar">
+        <div class="cooldown-progress"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -73,6 +86,7 @@
   </div>
 </div>
 
+<script src="gameConfig.js"></script>
 <script src="js/renderer/gameRenderer.js"></script>
 <script src="js/renderer/entityRenderer.js"></script>
 <script src="js/renderer/mapRenderer.js"></script>
