@@ -4,7 +4,7 @@ class InputHandler {
     this.lastMeleeTime = 0;
     this.lastRangedTime = 0;
     this.lastMoveTime = 0;
-    this.moveThrottle = 50; // Ограничение частоты отправки движения
+    this.moveThrottle = 50;
   }
 
   setup() {
@@ -26,9 +26,8 @@ class InputHandler {
       this.game.state.keys[e.key.toLowerCase()] = false;
     });
 
-    // Обработчик для дальней атаки по клику мыши (опционально)
     this.game.canvas.addEventListener('click', (e) => {
-      if (this.game.state.keys['q']) return; // Если уже нажата клавиша Q
+      if (this.game.state.keys['q']) return;
       this.handleMouseRangedAttack(e);
     });
     
@@ -59,44 +58,20 @@ class InputHandler {
     const now = Date.now();
     if (now - this.lastMoveTime < this.moveThrottle) return;
 
-    let dx = 0, dy = 0;
-    let direction = null;
-
-    if (this.game.state.keys[GAME_CONFIG.CONTROLS.MOVE_UP]) {
-      dy = -1;
-      direction = 'up';
-    }
-    if (this.game.state.keys[GAME_CONFIG.CONTROLS.MOVE_DOWN]) {
-      dy = 1;
-      direction = 'down';
-    }
-    if (this.game.state.keys[GAME_CONFIG.CONTROLS.MOVE_LEFT]) {
-      dx = -1;
-      direction = 'left';
-    }
-    if (this.game.state.keys[GAME_CONFIG.CONTROLS.MOVE_RIGHT]) {
-      dx = 1;
-      direction = 'right';
-    }
-
-    // Диагональное движение
-    if (dx && dy) {
-      if (Math.abs(dx) >= Math.abs(dy)) {
-        direction = dx > 0 ? 'right' : 'left';
-      } else {
-        direction = dy > 0 ? 'down' : 'up';
-      }
-    }
+    const movement = GameUtils.getMovementDirection(this.game.state.keys, GAME_CONFIG.CONTROLS);
     
-    if (dx || dy) {
+    if (movement.dx || movement.dy) {
       const player = this.game.state.myPlayer;
-      const newX = Math.max(0, Math.min(this.game.WORLD_SIZE, player.x + dx * GAME_CONFIG.PLAYER_SPEED));
-      const newY = Math.max(0, Math.min(this.game.WORLD_SIZE, player.y + dy * GAME_CONFIG.PLAYER_SPEED));
+      const newPos = GameUtils.clampToWorld(
+        player.x + movement.dx * GAME_CONFIG.PLAYER_SPEED,
+        player.y + movement.dy * GAME_CONFIG.PLAYER_SPEED,
+        this.game.WORLD_SIZE
+      );
       
       this.game.socket.emit('move', { 
-        x: newX, 
-        y: newY, 
-        direction: direction 
+        x: newPos.x, 
+        y: newPos.y, 
+        direction: movement.direction 
       });
       
       this.lastMoveTime = now;
@@ -106,7 +81,6 @@ class InputHandler {
   handleAttacks() {
     const now = Date.now();
     
-    // Ближняя атака (пробел)
     if (this.game.state.keys[GAME_CONFIG.CONTROLS.MELEE_ATTACK]) {
       if (now - this.lastMeleeTime > GAME_CONFIG.MELEE_ATTACK.COOLDOWN) {
         this.game.socket.emit('meleeAttack');
@@ -115,7 +89,6 @@ class InputHandler {
       }
     }
     
-    // Дальняя атака (Q) - атака в направлении движения или по центру экрана
     if (this.game.state.keys[GAME_CONFIG.CONTROLS.RANGED_ATTACK]) {
       if (now - this.lastRangedTime > GAME_CONFIG.RANGED_ATTACK.COOLDOWN) {
         this.performRangedAttack();
@@ -128,29 +101,24 @@ class InputHandler {
     if (!this.game.state.myPlayer) return;
 
     const player = this.game.state.myPlayer;
+    const movement = GameUtils.getMovementDirection(this.game.state.keys, GAME_CONFIG.CONTROLS);
     let targetX = player.x;
     let targetY = player.y;
 
-    // Определяем направление атаки на основе текущего движения
-    if (this.game.state.keys[GAME_CONFIG.CONTROLS.MOVE_UP]) {
-      targetY -= GAME_CONFIG.RANGED_ATTACK.RANGE;
-    } else if (this.game.state.keys[GAME_CONFIG.CONTROLS.MOVE_DOWN]) {
-      targetY += GAME_CONFIG.RANGED_ATTACK.RANGE;
-    } else if (this.game.state.keys[GAME_CONFIG.CONTROLS.MOVE_LEFT]) {
-      targetX -= GAME_CONFIG.RANGED_ATTACK.RANGE;
-    } else if (this.game.state.keys[GAME_CONFIG.CONTROLS.MOVE_RIGHT]) {
-      targetX += GAME_CONFIG.RANGED_ATTACK.RANGE;
+    if (movement.dx || movement.dy) {
+      targetX += movement.dx * GAME_CONFIG.RANGED_ATTACK.RANGE;
+      targetY += movement.dy * GAME_CONFIG.RANGED_ATTACK.RANGE;
     } else {
-      // Если не двигаемся, стреляем в центр экрана
-      targetX = player.x + (this.game.canvas.width / 2 - player.x + this.game.state.camera.x) * 0.3;
-      targetY = player.y + (this.game.canvas.height / 2 - player.y + this.game.state.camera.y) * 0.3;
+      const centerOffset = GameUtils.screenToWorld(
+        this.game.canvas.width / 2,
+        this.game.canvas.height / 2,
+        this.game.state.camera
+      );
+      targetX += (centerOffset.x - player.x) * 0.3;
+      targetY += (centerOffset.y - player.y) * 0.3;
     }
 
-    this.game.socket.emit('rangedAttack', { 
-      targetX: targetX, 
-      targetY: targetY 
-    });
-    
+    this.game.socket.emit('rangedAttack', { targetX, targetY });
     this.game.startRangedAttack();
   }
 
@@ -160,16 +128,15 @@ class InputHandler {
     if (!this.game.state.myPlayer) return;
 
     const rect = this.game.canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    
-    // Конвертируем координаты мыши в мировые координаты
-    const worldX = mouseX + this.game.state.camera.x;
-    const worldY = mouseY + this.game.state.camera.y;
+    const mousePos = GameUtils.screenToWorld(
+      e.clientX - rect.left,
+      e.clientY - rect.top,
+      this.game.state.camera
+    );
 
     this.game.socket.emit('rangedAttack', { 
-      targetX: worldX, 
-      targetY: worldY 
+      targetX: mousePos.x, 
+      targetY: mousePos.y 
     });
     
     this.game.startRangedAttack();

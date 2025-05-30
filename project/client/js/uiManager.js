@@ -7,40 +7,29 @@ class UIManager {
     const modal = document.getElementById('nameModal');
     const input = document.getElementById('playerNameInput');
     
-    if (modal) {
-      modal.style.display = 'flex';
-    }
-    if (input) {
-      input.focus();
-    }
+    if (modal) modal.style.display = 'flex';
+    if (input) input.focus();
   }
 
   joinGame() {
     const nameInput = document.getElementById('playerNameInput');
     if (!nameInput) return;
     
-    const name = nameInput.value.trim();
-    if (!name) {
-      alert('Введите имя!');
-      nameInput.focus();
-      return;
-    }
-
-    if (name.length > 15) {
-      alert('Имя слишком длинное! Максимум 15 символов.');
+    const validation = GameUtils.validatePlayerName(nameInput.value);
+    if (!validation.valid) {
+      alert(validation.error);
       nameInput.focus();
       return;
     }
     
-    // Отправляем данные согласно API
     this.game.socket.emit('join', { 
-      name: name,
-      color: '#' + Math.floor(Math.random()*16777215).toString(16) // Случайный цвет
+      name: validation.name,
+      color: GameUtils.getRandomColor()
     });
     
     const playerNameEl = document.getElementById('playerName');
     if (playerNameEl) {
-      playerNameEl.textContent = `Игрок: ${name}`;
+      playerNameEl.textContent = `Игрок: ${validation.name}`;
     }
   }
 
@@ -54,7 +43,7 @@ class UIManager {
       coinsEl.textContent = this.game.state.myPlayer.coins || 0;
     }
     if (hpEl) {
-      const hp = Math.max(0, Math.min(this.game.state.myPlayer.maxHp || 100, this.game.state.myPlayer.hp || 0));
+      const hp = GameUtils.clampHP(this.game.state.myPlayer.hp, this.game.state.myPlayer.maxHp);
       hpEl.textContent = hp;
     }
   }
@@ -73,8 +62,8 @@ class UIManager {
     playerListContent.innerHTML = players
       .sort((a, b) => (b.coins || 0) - (a.coins || 0))
       .map(p => {
-        const isMe = p.id === this.game.playerId;
-        const hp = Math.max(0, p.hp || 0);
+        const isMe = GameUtils.isMyPlayer(p.id, this.game.playerId);
+        const hp = GameUtils.clampHP(p.hp);
         return `
           <div class="player-item ${isMe ? 'me' : ''}">
             <span class="player-name">${p.name || 'Игрок'}</span>
@@ -102,19 +91,15 @@ class UIManager {
     }
     
     if (gameTimeEl) {
-      const elapsed = Math.floor((Date.now() - this.game.state.stats.startTime) / 1000);
-      const minutes = Math.floor(elapsed / 60);
-      const seconds = elapsed % 60;
-      gameTimeEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      const elapsed = Date.now() - this.game.state.stats.startTime;
+      gameTimeEl.textContent = GameUtils.formatTime(elapsed);
     }
   }
 
   showDeathMessage(killerName) {
-    // Можно заменить на более красивое уведомление
     const message = killerName ? `Вас убил ${killerName}!` : 'Вы погибли!';
     alert(message);
     
-    // Сброс статистики убийств при смерти
     this.game.state.stats.kills = 0;
     this.game.state.stats.mobKills = 0;
   }
