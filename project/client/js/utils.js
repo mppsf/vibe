@@ -96,4 +96,34 @@ class GameUtils {
     ctx.fillStyle = color;
     ctx.fillRect(x, y, width, height);
   }
+  static getMovementDirection(keys, controls) {
+    let dx = 0, dy = 0;
+    
+    if (keys[controls.MOVE_UP]) dy -= 1;
+    if (keys[controls.MOVE_DOWN]) dy += 1;
+    if (keys[controls.MOVE_LEFT]) dx -= 1;
+    if (keys[controls.MOVE_RIGHT]) dx += 1;
+    
+    if (dx !== 0 && dy !== 0) {
+      dx *= 0.707;
+      dy *= 0.707;
+    }
+    
+    let direction = 'down';
+    if (dx > 0) direction = 'right';
+    else if (dx < 0) direction = 'left';
+    else if (dy > 0) direction = 'down';
+    else if (dy < 0) direction = 'up';
+    
+    return { dx, dy, direction };
+  }
+    static distance(a, b) {
+    return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+  }
+  
+  static clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+  }
+
+  
 }

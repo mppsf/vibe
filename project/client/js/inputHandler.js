@@ -54,7 +54,6 @@ class InputHandler {
         return;
       }
       
-      // Обработка атак сразу при нажатии
       if (key === ' ') {
         e.preventDefault();
         this.handleMeleeAttack();
@@ -242,31 +241,42 @@ class InputHandler {
 
   update() {
     if (!this.game.state.myPlayer) return;
-    
     this.handleMovement();
-    // Убираем обработку атак из update, т.к. теперь обрабатываем в keydown
   }
 
   handleMovement() {
     const now = Date.now();
     if (now - this.lastMoveTime < this.moveThrottle) return;
 
-    const movement = GameUtils.getMovementDirection(this.game.state.keys, GAME_CONFIG.CONTROLS);
+    // Используем собственную реализацию вместо GameUtils
+    let dx = 0, dy = 0;
     
-    if (movement.dx || movement.dy) {
-      this.game.socket.emit('move', { 
-        dx: movement.dx, 
-        dy: movement.dy,
-        direction: movement.direction 
-      });
-      
+    if (this.game.state.keys.w) dy -= 1;
+    if (this.game.state.keys.s) dy += 1;
+    if (this.game.state.keys.a) dx -= 1;
+    if (this.game.state.keys.d) dx += 1;
+    
+    // Нормализация диагонального движения
+    if (dx !== 0 && dy !== 0) {
+      dx *= 0.707;
+      dy *= 0.707;
+    }
+    
+    let direction = 'down';
+    if (dx > 0) direction = 'right';
+    else if (dx < 0) direction = 'left';
+    else if (dy > 0) direction = 'down';
+    else if (dy < 0) direction = 'up';
+    
+    if (dx || dy) {
+      this.game.socket.emit('move', { dx, dy, direction });
       this.lastMoveTime = now;
     }
   }
 
   handleMeleeAttack() {
     const now = Date.now();
-    if (now - this.lastMeleeTime < GAME_CONFIG.MELEE_ATTACK.COOLDOWN) return;
+    if (now - this.lastMeleeTime < GAME_CONFIG.ATTACKS.MELEE.COOLDOWN) return;
     if (!this.game.state.myPlayer) return;
     
     this.game.socket.emit('meleeAttack');
@@ -276,7 +286,7 @@ class InputHandler {
 
   handleRangedAttack() {
     const now = Date.now();
-    if (now - this.lastRangedTime < GAME_CONFIG.RANGED_ATTACK.COOLDOWN) return;
+    if (now - this.lastRangedTime < GAME_CONFIG.ATTACKS.RANGED.COOLDOWN) return;
     
     this.performRangedAttack();
     this.lastRangedTime = now;
@@ -285,18 +295,24 @@ class InputHandler {
   performRangedAttack() {
     if (!this.game.state.myPlayer) return;
 
-    const player = this.game.state.myPlayer;
-    const movement = GameUtils.getMovementDirection(this.game.state.keys, GAME_CONFIG.CONTROLS);
-    
     let vx = 0, vy = 0;
 
-    if (movement.dx !== 0 || movement.dy !== 0) {
-      const length = Math.sqrt(movement.dx * movement.dx + movement.dy * movement.dy);
-      vx = movement.dx / length;
-      vy = movement.dy / length;
-    } else {
+    // Определяем направление стрельбы на основе текущего движения
+    if (this.game.state.keys.w) vy -= 1;
+    if (this.game.state.keys.s) vy += 1;
+    if (this.game.state.keys.a) vx -= 1;
+    if (this.game.state.keys.d) vx += 1;
+    
+    // Если нет движения, стреляем вправо по умолчанию
+    if (vx === 0 && vy === 0) {
       vx = 1;
-      vy = 0;
+    }
+    
+    // Нормализация
+    const length = Math.sqrt(vx * vx + vy * vy);
+    if (length > 0) {
+      vx /= length;
+      vy /= length;
     }
 
     this.game.socket.emit('rangedAttack', { vx, vy });
@@ -305,19 +321,16 @@ class InputHandler {
 
   handleMouseRangedAttack(e) {
     const now = Date.now();
-    if (now - this.lastRangedTime < GAME_CONFIG.RANGED_ATTACK.COOLDOWN) return;
+    if (now - this.lastRangedTime < GAME_CONFIG.ATTACKS.RANGED.COOLDOWN) return;
     if (!this.game.state.myPlayer) return;
 
     const rect = this.game.canvas.getBoundingClientRect();
-    const mousePos = GameUtils.screenToWorld(
-      e.clientX - rect.left,
-      e.clientY - rect.top,
-      this.game.state.camera
-    );
+    const mouseX = e.clientX - rect.left + this.game.state.camera.x;
+    const mouseY = e.clientY - rect.top + this.game.state.camera.y;
 
     const player = this.game.state.myPlayer;
-    const dx = mousePos.x - player.x;
-    const dy = mousePos.y - player.y;
+    const dx = mouseX - player.x;
+    const dy = mouseY - player.y;
     const length = Math.sqrt(dx * dx + dy * dy);
     const vx = length > 0 ? dx / length : 1;
     const vy = length > 0 ? dy / length : 0;
