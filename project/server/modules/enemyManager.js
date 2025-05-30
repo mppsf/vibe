@@ -1,4 +1,4 @@
-const GAME_CONFIG = require('./gameConfig');
+const GAME_CONFIG = require('../gameConfig');
 
 class EnemyManager {
   constructor() {

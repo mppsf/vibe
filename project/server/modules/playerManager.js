@@ -1,122 +1,111 @@
-const GAME_CONFIG = require('./gameConfig');
+const GAME_CONFIG = require('../gameConfig');
 
-class EnemyManager {
+class PlayerManager {
   constructor() {
-    this.enemies = new Map();
-    this.nextId = 1;
-    this.generateEnemies();
+    this.players = new Map();
   }
 
-  generateEnemies() {
-    for (let i = 0; i < GAME_CONFIG.ENEMIES.MAX_COUNT; i++) {
-      this.spawnEnemy();
+  addPlayer(socketId, data) {
+    const player = {
+      id: socketId,
+      name: data.name || 'Anonymous',
+      x: Math.random() * (GAME_CONFIG.WORLD_SIZE - 200) + 100,
+      y: Math.random() * (GAME_CONFIG.WORLD_SIZE - 200) + 100,
+      hp: GAME_CONFIG.PLAYER.MAX_HP,
+      coins: 0,
+      lastMeleeAttack: 0,
+      lastRangedAttack: 0
+    };
+    this.players.set(socketId, player);
+    return player;
+  }
+
+  removePlayer(socketId) {
+    this.players.delete(socketId);
+  }
+
+  movePlayer(socketId, data) {
+    const player = this.players.get(socketId);
+    if (!player || player.hp <= 0) return;
+
+    const newX = Math.max(GAME_CONFIG.PLAYER.SIZE, 
+      Math.min(GAME_CONFIG.WORLD_SIZE - GAME_CONFIG.PLAYER.SIZE, 
+        player.x + data.dx * GAME_CONFIG.PLAYER.SPEED));
+    const newY = Math.max(GAME_CONFIG.PLAYER.SIZE, 
+      Math.min(GAME_CONFIG.WORLD_SIZE - GAME_CONFIG.PLAYER.SIZE, 
+        player.y + data.dy * GAME_CONFIG.PLAYER.SPEED));
+
+    player.x = newX;
+    player.y = newY;
+  }
+
+  meleeAttack(socketId, enemyManager) {
+    const player = this.players.get(socketId);
+    if (!player || player.hp <= 0) return null;
+
+    const now = Date.now();
+    if (now - player.lastMeleeAttack < GAME_CONFIG.ATTACKS.MELEE.COOLDOWN) return null;
+
+    player.lastMeleeAttack = now;
+    const results = { killedEnemies: [], killedPlayers: [] };
+
+    for (let [enemyId, enemy] of enemyManager.enemies) {
+      if (this.distance(player, enemy) < GAME_CONFIG.ATTACKS.MELEE.RANGE) {
+        const killed = enemyManager.takeDamage(enemyId, GAME_CONFIG.ATTACKS.MELEE.DAMAGE);
+        if (killed) {
+          results.killedEnemies.push(enemyId);
+          player.coins++;
+        }
+      }
     }
+
+    for (let [playerId, otherPlayer] of this.players) {
+      if (playerId === socketId || otherPlayer.hp <= 0) continue;
+      if (this.distance(player, otherPlayer) < GAME_CONFIG.ATTACKS.MELEE.RANGE) {
+        otherPlayer.hp -= GAME_CONFIG.ATTACKS.MELEE.DAMAGE;
+        if (otherPlayer.hp <= 0) {
+          results.killedPlayers.push({ 
+            player: otherPlayer, 
+            killer: player.name 
+          });
+          player.coins += Math.floor(otherPlayer.coins / 4);
+        }
+      }
+    }
+
+    return results;
   }
 
-  spawnEnemy() {
-    const template = GAME_CONFIG.ENEMIES.TYPES[Math.floor(Math.random() * GAME_CONFIG.ENEMIES.TYPES.length)];
-    const id = this.nextId++;
-    this.enemies.set(id, {
-      ...template, 
-      id, 
-      maxHp: template.hp,
-      x: Math.random() * (GAME_CONFIG.WORLD_SIZE - 400) + 200,
-      y: Math.random() * (GAME_CONFIG.WORLD_SIZE - 400) + 200,
-      lastHit: 0, 
-      lastShot: 0,
-      target: null
+  rangedAttack(socketId, data, bulletManager) {
+    const player = this.players.get(socketId);
+    if (!player || player.hp <= 0) return;
+
+    const now = Date.now();
+    if (now - player.lastRangedAttack < GAME_CONFIG.ATTACKS.RANGED.COOLDOWN) return;
+
+    player.lastRangedAttack = now;
+    bulletManager.createBullet({
+      x: player.x,
+      y: player.y,
+      vx: data.vx * GAME_CONFIG.ATTACKS.RANGED.BULLET_SPEED,
+      vy: data.vy * GAME_CONFIG.ATTACKS.RANGED.BULLET_SPEED,
+      damage: GAME_CONFIG.ATTACKS.RANGED.DAMAGE,
+      fromEnemy: false,
+      ownerId: socketId
     });
   }
 
-  findClosestPlayer(enemy, players) {
-    let closest = null, minDist = Infinity;
-    for (let player of players.values()) {
-      if (player.hp <= 0) continue;
-      const dist = this.distance(enemy, player);
-      if (dist < minDist) { 
-        minDist = dist; 
-        closest = player; 
+  handlePlayerDeath(player, coinManager) {
+    player.hp = 0;
+    coinManager.dropCoinsFromPlayer(player);
+    setTimeout(() => {
+      if (this.players.has(player.id)) {
+        player.hp = GAME_CONFIG.PLAYER.MAX_HP;
+        player.x = Math.random() * (GAME_CONFIG.WORLD_SIZE - 200) + 100;
+        player.y = Math.random() * (GAME_CONFIG.WORLD_SIZE - 200) + 100;
+        player.coins = Math.floor(player.coins * 0.5);
       }
-    }
-    return closest;
-  }
-
-  update(players, bulletManager, coinManager) {
-    const now = Date.now();
-    
-    for (let [enemyId, enemy] of this.enemies) {
-      if (enemy.hp <= 0) {
-        coinManager.dropCoinFromEnemy(enemy.x, enemy.y, enemy.type);
-        this.enemies.delete(enemyId);
-        continue;
-      }
-
-      const target = this.findClosestPlayer(enemy, players);
-      if (!target) continue;
-
-      const dist = this.distance(enemy, target);
-      const dx = target.x - enemy.x;
-      const dy = target.y - enemy.y;
-
-      if (enemy.type === 'shooter' && dist < enemy.shootRange && now - enemy.lastShot > enemy.shootCooldown) {
-        bulletManager.createBullet({
-          x: enemy.x, 
-          y: enemy.y,
-          vx: (dx / dist) * GAME_CONFIG.BULLETS.ENEMY_SPEED, 
-          vy: (dy / dist) * GAME_CONFIG.BULLETS.ENEMY_SPEED,
-          damage: enemy.damage, 
-          fromEnemy: true,
-          ownerId: enemyId
-        });
-        enemy.lastShot = now;
-      }
-
-      if (dist > 0) {
-        let shouldMove = true;
-        let moveSpeed = enemy.speed;
-        
-        if (enemy.type === 'runner' && dist < enemy.fleeDistance) {
-          moveSpeed = -enemy.speed;
-        } else if (dist <= GAME_CONFIG.ENEMIES.MELEE_RANGE) {
-          shouldMove = false;
-        }
-        
-        if (shouldMove) {
-          enemy.x += (dx / dist) * moveSpeed;
-          enemy.y += (dy / dist) * moveSpeed;
-        }
-      }
-
-      enemy.x = Math.max(50, Math.min(GAME_CONFIG.WORLD_SIZE - 50, enemy.x));
-      enemy.y = Math.max(50, Math.min(GAME_CONFIG.WORLD_SIZE - 50, enemy.y));
-
-      if (dist < GAME_CONFIG.ENEMIES.MELEE_RANGE && now - enemy.lastHit > GAME_CONFIG.ENEMIES.ATTACK_COOLDOWN) {
-        target.hp -= enemy.damage;
-        enemy.lastHit = now;
-        if (target.hp <= 0) {
-          return { killedPlayer: target, killerName: `${enemy.type} enemy` };
-        }
-      }
-    }
-
-    if (this.enemies.size < GAME_CONFIG.ENEMIES.MIN_COUNT) {
-      this.spawnEnemy();
-    }
-    
-    return null;
-  }
-
-  takeDamage(enemyId, damage) {
-    const enemy = this.enemies.get(enemyId);
-    if (enemy) {
-      enemy.hp -= damage;
-      return enemy.hp <= 0;
-    }
-    return false;
-  }
-
-  removeEnemy(enemyId) {
-    this.enemies.delete(enemyId);
+    }, 3000);
   }
 
   distance(a, b) {
@@ -124,8 +113,8 @@ class EnemyManager {
   }
 
   getState() {
-    return Array.from(this.enemies.values());
+    return Array.from(this.players.values());
   }
 }
 
-module.exports = EnemyManager;
+module.exports = PlayerManager;
