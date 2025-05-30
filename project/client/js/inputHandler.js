@@ -319,26 +319,6 @@ class InputHandler {
     this.game.startRangedAttack();
   }
 
-  handleMouseRangedAttack(e) {
-    const now = Date.now();
-    if (now - this.lastRangedTime < GAME_CONFIG.ATTACKS.RANGED.COOLDOWN) return;
-    if (!this.game.state.myPlayer) return;
-
-    const rect = this.game.canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left + this.game.state.camera.x;
-    const mouseY = e.clientY - rect.top + this.game.state.camera.y;
-
-    const player = this.game.state.myPlayer;
-    const dx = mouseX - player.x;
-    const dy = mouseY - player.y;
-    const length = Math.sqrt(dx * dx + dy * dy);
-    const vx = length > 0 ? dx / length : 1;
-    const vy = length > 0 ? dy / length : 0;
-
-    this.game.socket.emit('rangedAttack', { vx, vy });
-    this.game.startRangedAttack();
-    this.lastRangedTime = now;
-  }
 
   togglePlayerList() {
     const playerList = document.getElementById('onlinePlayersList');
