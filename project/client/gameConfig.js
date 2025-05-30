@@ -5,7 +5,7 @@ const GAME_CONFIG = {
   
   // Игрок
   PLAYER_SIZE: 30,
-  PLAYER_SPEED: 10,
+  PLAYER_SPEED: 15,
   PLAYER_MAX_HP: 100,
   
   // Атаки
